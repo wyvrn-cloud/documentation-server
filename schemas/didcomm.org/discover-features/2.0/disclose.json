@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "discover-features/2.0/disclose",
+  "description": "Discloses features the responder supports, in reply to queries (or proactively). An empty disclosures list means 'not disclosing', not 'unsupported'.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/discover-features/2.0/disclose"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "required": [
+        "disclosures"
+      ],
+      "properties": {
+        "disclosures": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "feature-type",
+              "id"
+            ],
+            "properties": {
+              "feature-type": {
+                "type": "string"
+              },
+              "id": {
+                "type": "string",
+                "description": "Identifier of one feature, e.g. a PIURI for feature-type protocol."
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Roles the responder can play, for feature-type protocol."
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

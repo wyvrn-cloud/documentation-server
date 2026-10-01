@@ -52,14 +52,21 @@ to the repo-level `schemas/`.
 - **Protocols:** read each `readme.md`'s YAML frontmatter and key it by its `piuri`.
   `mappings/piuri-paths.toml` takes precedence; a test fails if a frontmatter PIURI
   disagrees with its folder and has no mapping entry, so new mismatches can't slip in.
-  Split the body into sections by heading. Pull JSON examples out of fenced code blocks
-  and group them by `type` (v2) or `@type` (v1). Note the roles and states tables.
+  Split the body into sections by heading (ids are lower-kebab-case headings, as
+  `documentation/1.0` defines). Pull JSON examples out of fenced code blocks and group
+  them by `type` (v2) or `@type` (v1). Parse them leniently (JSON5), because several
+  upstream examples have trailing commas or `//` comments. Note the roles and states
+  tables.
 - **Spec:** for each spec version in `specs.json` (editor's draft, `v2.0`, `v2.1`
   snapshots), stitch the `markdown_paths` in order and split by heading into
   addressable sections with a table of contents.
-- **Schemas:** load the overlay files and attach them to the matching PIURI and message
-  type. A test validates every extracted example against its schema. That catches
-  schema bugs, and errors in the upstream examples too.
+- **Schemas:** load `<protocol dir>/schemas/*.json` shipped next to a definition (the
+  `wyvrn-cloud/protocols` convention), then the overlay folders (`schemas/<PIURI path>/`),
+  and attach them by the `type` const. A schema shipped with the protocol wins over an
+  overlay. A test validates every extracted example against its schema and *reports*
+  mismatches without failing, because upstream examples legitimately use placeholders
+  and skip required headers (see `schemas/README.md`). It does fail if one of our own
+  schemas is invalid, or a `documentation/1.0` example doesn't validate.
 
 ## DIDComm endpoint
 
