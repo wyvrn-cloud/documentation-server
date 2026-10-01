@@ -1,0 +1,9 @@
+# Protocol definitions whose folder doesn't match their PIURI, as
+# "<PIURI>" = "<folder within its source>". The index always keys definitions by the
+# PIURI in their frontmatter; an entry here records that a mismatch is known, and the
+# index test fails on any mismatch *not* listed, so new ones can't slip in unnoticed.
+# Delete entries once upstream renames the folders.
+
+[piuri]
+"https://didcomm.org/message-pickup/4.0" = "messagepickup/4.0"
+"https://didcomm.org/questionanswer/1.0" = "question-answer/1.0"

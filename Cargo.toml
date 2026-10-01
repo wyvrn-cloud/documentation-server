@@ -1,0 +1,29 @@
+[package]
+name = "documentation-server"
+version = "0.0.1"
+edition = "2021"
+license = "Apache-2.0"
+repository = "https://github.com/wyvrn-cloud/documentation-server"
+description = "A DIDComm v2 registry agent serving protocol documentation, the DIDComm Messaging spec, and JSON Schemas over https://wyvrn.app/documentation/1.0"
+publish = false
+
+[dependencies]
+# Pinned to the branch carrying didcomm-agent until it merges; switch to the default
+# branch (or a tag) then.
+didcomm-agent = { git = "https://github.com/wyvrn-cloud/didcomm", branch = "claude/admiring-mayer-68xfrs" }
+anyhow = "1"
+axum = "0.8"
+# Upstream examples are often not strict JSON (trailing commas, // comments).
+json5 = "0.4"
+reqwest = "0.13"
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+serde_yaml = "0.9"
+thiserror = "1"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "signal"] }
+toml = "0.8"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[dev-dependencies]
+jsonschema = { version = "0.33", default-features = false }

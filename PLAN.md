@@ -7,6 +7,23 @@ For the whole-system plan (MCP bridge, decisions, phases) see
 [`mcp/PLAN.md`](https://github.com/wyvrn-cloud/mcp/blob/master/PLAN.md); this file
 covers only this repo.
 
+## Status (2026-10-01)
+
+Built and working; see [`README.md`](README.md):
+- It indexes all 50 didcomm.org protocol definitions and all three spec versions, with
+  0 warnings. 11 upstream examples that aren't even JSON5 are reported as upstream
+  issues, not warnings.
+- It answers `query`, `request` and `spec-request` (plus discover-features and
+  trust-ping) over DIDComm, as a `did:peer:4` or a `did:web`.
+- The container image is about 150 MB and has been verified end to end.
+
+Differences from the plan below:
+- Upstream content problems are reported separately from setup warnings, so they never
+  fail startup or the tests.
+- Section listings include each heading's `level`.
+- Source revisions come from `git rev-parse`. The container image has no `.git`, so it
+  reports none unless a source sets `revision` in the config.
+
 ## Layout
 
 ```
