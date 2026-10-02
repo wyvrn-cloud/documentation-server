@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "group-chat/1.0/request",
+  "description": "The controller invites connections to a group chat: id, subject, an out-of-band invitation URL for the private channel, participants and their aliases.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "thid",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/group-chat/1.0/request"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "ConversationId": {
+          "type": "string",
+          "description": "Uniquely identifies the conversation."
+        },
+        "Subject": {
+          "type": "string"
+        },
+        "CreatedAt": {
+          "type": "string",
+          "description": "ISO 8601 timestamp."
+        },
+        "InvitationDate": {
+          "type": "string",
+          "description": "ISO 8601 timestamp."
+        },
+        "InvitationUrl": {
+          "type": "string",
+          "description": "Out-of-band invitation URL for the private group channel."
+        },
+        "Participant": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "isContact": {
+                "type": "boolean"
+              },
+              "isGroup": {
+                "type": "boolean"
+              },
+              "ConnectionId": {
+                "type": "string"
+              },
+              "GroupMemberId": {
+                "type": "string",
+                "description": "The participant's alias."
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "ConversationId",
+        "Subject",
+        "CreatedAt",
+        "InvitationDate",
+        "InvitationUrl",
+        "Participant"
+      ]
+    }
+  }
+}

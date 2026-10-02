@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "payments/1.0/charge-request",
+  "description": "Mandates profile: a cycle's charge, resulting in a base handshake-request for its terms.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/payments/1.0/charge-request"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "method_ref": {
+          "type": "string"
+        },
+        "terms": {
+          "type": "object",
+          "description": "What is to be paid. Its JCS-canonical SHA-256 is integrity.terms_sha256 and the receipt's summary_hash.",
+          "required": [
+            "asset",
+            "quantity"
+          ],
+          "properties": {
+            "request_id": {
+              "type": "string"
+            },
+            "asset": {
+              "type": "object",
+              "required": [
+                "caip19"
+              ],
+              "properties": {
+                "caip19": {
+                  "type": "string",
+                  "description": "CAIP-19 asset id."
+                },
+                "decimals": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "quantity": {
+              "type": "string",
+              "pattern": "^[0-9]+$",
+              "description": "Atomic units, the canonical amount."
+            },
+            "display": {
+              "type": "object",
+              "description": "UI only; never used to validate amounts.",
+              "properties": {
+                "currency": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                }
+              }
+            },
+            "invoice": {
+              "type": "object"
+            },
+            "tax": {
+              "type": "object"
+            },
+            "network": {
+              "type": "object",
+              "properties": {
+                "chain": {
+                  "type": "string",
+                  "description": "CAIP-2 chain id."
+                },
+                "confirmations_required": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "fees": {
+              "type": "object"
+            },
+            "partial_allowed": {
+              "type": "boolean"
+            },
+            "tolerance": {
+              "type": "object",
+              "properties": {
+                "under": {
+                  "type": "string"
+                },
+                "over": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "integrity": {
+          "type": "object",
+          "required": [
+            "terms_sha256"
+          ],
+          "properties": {
+            "terms_sha256": {
+              "type": "string"
+            }
+          }
+        },
+        "mandate_id": {
+          "type": "string"
+        },
+        "cycle_id": {
+          "type": "string"
+        },
+        "quote_id": {
+          "type": "string"
+        },
+        "ext": {
+          "type": "object",
+          "description": "Namespaced extensions (reverse-DNS keys); unknown keys MUST be ignored."
+        }
+      },
+      "required": [
+        "mandate_id",
+        "cycle_id",
+        "terms"
+      ]
+    }
+  }
+}

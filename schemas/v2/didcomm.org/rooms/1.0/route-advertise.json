@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "rooms/1.0/route-advertise",
+  "description": "A router registers the DIDs it can reach, with a signed router attestation.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/rooms/1.0/route-advertise"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "room_did": {
+          "type": "string",
+          "pattern": "^did:[a-z0-9]+:[^#]+$",
+          "description": "The room's DID."
+        },
+        "reach": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "attestation": {
+          "type": "object",
+          "required": [
+            "signed",
+            "sig"
+          ],
+          "properties": {
+            "signed": {
+              "type": "object",
+              "required": [
+                "router",
+                "room_did",
+                "reach",
+                "exp"
+              ],
+              "properties": {
+                "router": {
+                  "type": "string"
+                },
+                "room_did": {
+                  "type": "string"
+                },
+                "reach": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "exp": {
+                  "type": "string"
+                },
+                "policy_hash": {
+                  "type": "string"
+                },
+                "nonce": {
+                  "type": "string"
+                }
+              }
+            },
+            "sig": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "required": [
+        "room_did",
+        "reach",
+        "attestation"
+      ]
+    }
+  }
+}

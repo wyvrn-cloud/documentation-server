@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "rooms/1.0/create",
+  "description": "Asks the host to create a room (an MLS group).",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/rooms/1.0/create"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "room_did": {
+          "type": "string",
+          "pattern": "^did:[a-z0-9]+:[^#]+$",
+          "description": "The room's DID."
+        },
+        "ciphersuite": {
+          "type": "string",
+          "description": "An MLS ciphersuite name."
+        },
+        "policy": {
+          "type": "object",
+          "properties": {
+            "join": {
+              "type": "string",
+              "description": "e.g. invite-only, open."
+            },
+            "max_members": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      },
+      "required": [
+        "room_did",
+        "ciphersuite"
+      ]
+    }
+  }
+}

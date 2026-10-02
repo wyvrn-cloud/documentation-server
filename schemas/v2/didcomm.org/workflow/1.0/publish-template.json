@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "workflow/1.0/publish-template",
+  "description": "Installs or updates a workflow template at the processor, which validates it and stores its hash.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/workflow/1.0/publish-template"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "template": {
+          "type": "object",
+          "description": "A workflow template: an authoritative state machine (states, transitions with guards and actions) and its catalog.",
+          "required": [
+            "id",
+            "version",
+            "states",
+            "transitions"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "version": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "states": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "final": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            },
+            "transitions": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "required": [
+                  "from",
+                  "to"
+                ],
+                "properties": {
+                  "from": {
+                    "type": "string"
+                  },
+                  "to": {
+                    "type": "string"
+                  },
+                  "guard": {},
+                  "action": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                }
+              }
+            },
+            "actions": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "typeURI": {
+                    "type": "string"
+                  },
+                  "profile_ref": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "catalog": {
+              "type": "object"
+            },
+            "display_hints": {
+              "type": "object"
+            },
+            "sensitivity": {
+              "type": "object"
+            },
+            "instance_policy": {
+              "type": "object"
+            }
+          }
+        },
+        "mode": {
+          "type": "string",
+          "description": "e.g. upsert."
+        }
+      },
+      "required": [
+        "template"
+      ]
+    }
+  }
+}

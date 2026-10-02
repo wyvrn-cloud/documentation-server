@@ -1,0 +1,218 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "media-sharing/1.0/share-media",
+  "description": "Shares media items, each referencing an attachment (with id and media_type). created_time is required.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "created_time",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/media-sharing/1.0/share-media"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "@id",
+              "attachment_id"
+            ],
+            "properties": {
+              "@id": {
+                "type": "string",
+                "description": "The item's id, used by request-media."
+              },
+              "attachment_id": {
+                "type": "string"
+              },
+              "ciphering": {
+                "type": "object",
+                "description": "How the media is encrypted, e.g. aes-256-cbc with key, iv and tag as hex.",
+                "properties": {
+                  "algorithm": {
+                    "type": "string"
+                  },
+                  "parameters": {
+                    "type": "object",
+                    "properties": {
+                      "key": {
+                        "type": "string"
+                      },
+                      "iv": {
+                        "type": "string"
+                      },
+                      "tag": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              "metadata": {
+                "type": "object",
+                "properties": {
+                  "preview": {
+                    "type": "string"
+                  },
+                  "blurhash": {
+                    "type": "string"
+                  },
+                  "duration": {
+                    "type": "number"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "icon": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "items"
+      ]
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/attachment"
+      },
+      "description": "The media, one attachment per item."
+    }
+  },
+  "$defs": {
+    "attachment": {
+      "type": "object",
+      "required": [
+        "data"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._~-]+$"
+        },
+        "description": {
+          "type": "string"
+        },
+        "filename": {
+          "type": "string"
+        },
+        "media_type": {
+          "type": "string"
+        },
+        "format": {
+          "type": "string"
+        },
+        "lastmod_time": {
+          "type": [
+            "integer",
+            "string"
+          ]
+        },
+        "byte_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "data": {
+          "type": "object",
+          "anyOf": [
+            {
+              "required": [
+                "jws"
+              ]
+            },
+            {
+              "required": [
+                "hash"
+              ]
+            },
+            {
+              "required": [
+                "links"
+              ]
+            },
+            {
+              "required": [
+                "base64"
+              ]
+            },
+            {
+              "required": [
+                "json"
+              ]
+            }
+          ],
+          "properties": {
+            "jws": {
+              "type": "object"
+            },
+            "hash": {
+              "type": "string"
+            },
+            "links": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "base64": {
+              "type": "string"
+            },
+            "json": {}
+          }
+        }
+      }
+    }
+  }
+}

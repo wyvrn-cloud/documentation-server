@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "signing/1.0/propose-signing",
+  "description": "Discovers capabilities and negotiates before a signing session.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/signing/1.0/propose-signing"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "session": {
+          "type": "object",
+          "required": [
+            "session_id",
+            "mode"
+          ],
+          "properties": {
+            "session_id": {
+              "type": "string",
+              "description": "Unique and high-entropy."
+            },
+            "mode": {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "enum": [
+                    "single",
+                    "threshold"
+                  ]
+                }
+              }
+            },
+            "threshold": {
+              "type": "object",
+              "properties": {
+                "scheme": {
+                  "enum": [
+                    "n-of-m",
+                    "cryptographic",
+                    "contract"
+                  ]
+                },
+                "n": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "m": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "signers": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "aggregation": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "capabilities": {
+          "type": "object",
+          "properties": {
+            "supported_suites": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "max_attachment_size": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      },
+      "required": [
+        "session"
+      ]
+    }
+  }
+}

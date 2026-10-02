@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "survey/1.0/response",
+  "description": "The answers to a survey, or that it was declined. On the request's thread.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "thid",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/survey/1.0/response"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "response": {
+          "type": "object",
+          "required": [
+            "response_type"
+          ],
+          "properties": {
+            "response_type": {
+              "enum": [
+                "data",
+                "decline"
+              ]
+            },
+            "data": {
+              "type": "object",
+              "description": "The answers, shaped like init_data; required when response_type is data."
+            }
+          },
+          "if": {
+            "properties": {
+              "response_type": {
+                "const": "data"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "data"
+            ]
+          }
+        }
+      },
+      "required": [
+        "response"
+      ]
+    }
+  }
+}
