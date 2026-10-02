@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://docs.wyvrn.app/attachment-formats/hlindy/proof-req@v2.0/request-presentation.json",
+  "title": "Indy proof request (hlindy/proof-req@v2.0) in request-presentation",
+  "type": "object",
+  "required": [
+    "name",
+    "version",
+    "requested_attributes",
+    "requested_predicates",
+    "nonce"
+  ],
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "nonce": {
+      "type": "string",
+      "pattern": "^[0-9]+$",
+      "description": "A decimal number, at least 80 bits."
+    },
+    "requested_attributes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "oneOf": [
+          {
+            "required": [
+              "name"
+            ],
+            "not": {
+              "required": [
+                "names"
+              ]
+            }
+          },
+          {
+            "required": [
+              "names"
+            ],
+            "not": {
+              "required": [
+                "name"
+              ]
+            }
+          }
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "names": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          },
+          "restrictions": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "non_revoked": {
+            "type": "object",
+            "properties": {
+              "from": {
+                "type": "integer"
+              },
+              "to": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      }
+    },
+    "requested_predicates": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "name",
+          "p_type",
+          "p_value"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "p_type": {
+            "enum": [
+              ">=",
+              ">",
+              "<=",
+              "<"
+            ]
+          },
+          "p_value": {
+            "type": "integer"
+          },
+          "restrictions": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "non_revoked": {
+            "type": "object",
+            "properties": {
+              "from": {
+                "type": "integer"
+              },
+              "to": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      }
+    },
+    "non_revoked": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "integer"
+        },
+        "to": {
+          "type": "integer"
+        }
+      }
+    },
+    "ver": {
+      "enum": [
+        "1.0",
+        "2.0"
+      ]
+    }
+  }
+}

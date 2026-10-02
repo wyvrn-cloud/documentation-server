@@ -252,3 +252,53 @@ fn shared_schema_definitions_match_the_canonical_ones() {
     }
     assert!(checked > 0);
 }
+
+#[test]
+fn attachment_formats_are_served_with_the_credential_protocols() {
+    let index = index();
+    assert_eq!(index.attachment_formats.len(), 26);
+
+    let ids = |piuri: &str| -> Vec<String> { index.formats_for(piuri).into_iter().map(|f| f.id).collect() };
+    let issue_v1 = ids("https://didcomm.org/issue-credential/2.0");
+    let issue_v2 = ids("https://didcomm.org/issue-credential/3.0");
+    let present_v1 = ids("https://didcomm.org/present-proof/2.0");
+    let present_v2 = ids("https://didcomm.org/present-proof/3.0");
+    assert!(issue_v1.contains(&"hlindy/cred@v2.0".to_string()) && !issue_v2.contains(&"hlindy/cred@v2.0".to_string()));
+    assert!(issue_v2.contains(&"dif/credential-manifest/application@v1.0".to_string()));
+    assert!(!issue_v1.contains(&"dif/credential-manifest/application@v1.0".to_string()));
+    for id in ["anoncreds/credential-offer@v1.0", "didcomm/w3c-vc-sd-jwt@v1.0", "aries/ld-proof-vc-detail@v1.0"] {
+        assert!(issue_v1.contains(&id.to_string()) && issue_v2.contains(&id.to_string()), "{id}");
+    }
+    assert!(present_v1.contains(&"hlindy/proof-req@v2.0".to_string()));
+    assert!(present_v2.contains(&"dif/presentation-exchange/definitions@v1.0".to_string()));
+    assert!(ids("https://didcomm.org/basicmessage/2.0").is_empty());
+
+    // DIDComm v1 messages name the decorator the attachment goes in; v2 ones don't.
+    let offer = |piuri: &str| {
+        index.formats_for(piuri).into_iter().find(|f| f.id == "anoncreds/credential-offer@v1.0").unwrap().uses.remove(0)
+    };
+    let v1 = offer("https://didcomm.org/issue-credential/2.0");
+    assert_eq!(v1.message, "https://didcomm.org/issue-credential/2.0/offer-credential");
+    assert_eq!(v1.attachment.as_deref(), Some("offers~attach"));
+    assert_eq!(offer("https://didcomm.org/issue-credential/3.0").attachment, None);
+
+    // One format, different content per message.
+    let pe = index
+        .formats_for("https://didcomm.org/present-proof/2.0")
+        .into_iter()
+        .find(|f| f.id == "dif/presentation-exchange/definitions@v1.0")
+        .unwrap();
+    assert_eq!(pe.uses.len(), 2);
+    assert_ne!(pe.uses[0].schema, pe.uses[1].schema);
+
+    // Every schema compiles, and checks content.
+    for format in &index.attachment_formats {
+        for use_ in &format.uses {
+            jsonschema::validator_for(&use_.schema).unwrap_or_else(|e| panic!("{} in {}: {e}", format.id, use_.message));
+        }
+    }
+    let offer_schema = jsonschema::validator_for(&v1.schema).unwrap();
+    let good = serde_json::json!({"schema_id": "s", "cred_def_id": "c", "nonce": "1", "key_correctness_proof": {}});
+    assert!(offer_schema.is_valid(&good));
+    assert!(!offer_schema.is_valid(&serde_json::json!({"schema_id": "s"})));
+}

@@ -5,6 +5,7 @@
 
 pub mod aries;
 pub mod config;
+pub mod formats;
 pub mod index;
 pub mod markdown;
 pub mod registry;

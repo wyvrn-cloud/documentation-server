@@ -1,0 +1,267 @@
+# Attachment formats: the payloads issue-credential and present-proof carry in their
+# attachments, named by a format identifier (a DIDComm v1 message's formats[].format, a
+# v2 attachment's format). Generated; see README.md. For each [[format]] and each of its
+# messages, <id>/<message>.json is the JSON Schema of the attachment's content in that
+# message, served with every protocol listed.
+
+# DIDComm v1: the attachment decorator of each message that carries formatted attachments.
+[attachments]
+"https://didcomm.org/issue-credential/2.0/propose-credential" = "filters~attach"
+"https://didcomm.org/issue-credential/2.0/offer-credential" = "offers~attach"
+"https://didcomm.org/issue-credential/2.0/request-credential" = "requests~attach"
+"https://didcomm.org/issue-credential/2.0/issue-credential" = "credentials~attach"
+"https://didcomm.org/present-proof/2.0/propose-presentation" = "proposals~attach"
+"https://didcomm.org/present-proof/2.0/request-presentation" = "request_presentations~attach"
+"https://didcomm.org/present-proof/2.0/presentation" = "presentations~attach"
+
+[[format]]
+id = "hlindy/cred-filter@v2.0"
+title = "Indy credential filter"
+document = "aries/attachment-formats"
+section = "rfc0592"
+[[format.use]]
+message = "propose-credential"
+protocols = ["https://didcomm.org/issue-credential/2.0"]
+
+[[format]]
+id = "hlindy/cred-abstract@v2.0"
+title = "Indy credential offer (abstract)"
+document = "aries/attachment-formats"
+section = "rfc0592"
+[[format.use]]
+message = "offer-credential"
+protocols = ["https://didcomm.org/issue-credential/2.0"]
+
+[[format]]
+id = "hlindy/cred-req@v2.0"
+title = "Indy credential request"
+document = "aries/attachment-formats"
+section = "rfc0592"
+[[format.use]]
+message = "request-credential"
+protocols = ["https://didcomm.org/issue-credential/2.0"]
+
+[[format]]
+id = "hlindy/cred@v2.0"
+title = "Indy credential"
+document = "aries/attachment-formats"
+section = "rfc0592"
+[[format.use]]
+message = "issue-credential"
+protocols = ["https://didcomm.org/issue-credential/2.0"]
+
+[[format]]
+id = "hlindy/proof-req@v2.0"
+title = "Indy proof request"
+document = "aries/attachment-formats"
+section = "rfc0592"
+[[format.use]]
+message = "propose-presentation"
+protocols = ["https://didcomm.org/present-proof/2.0"]
+[[format.use]]
+message = "request-presentation"
+protocols = ["https://didcomm.org/present-proof/2.0"]
+
+[[format]]
+id = "hlindy/proof@v2.0"
+title = "Indy proof"
+document = "aries/attachment-formats"
+section = "rfc0592"
+[[format.use]]
+message = "presentation"
+protocols = ["https://didcomm.org/present-proof/2.0"]
+
+[[format]]
+id = "anoncreds/credential-filter@v1.0"
+title = "AnonCreds credential filter"
+document = "aries/attachment-formats"
+section = "rfc0771"
+[[format.use]]
+message = "propose-credential"
+protocols = ["https://didcomm.org/issue-credential/2.0", "https://didcomm.org/issue-credential/3.0"]
+
+[[format]]
+id = "anoncreds/credential-offer@v1.0"
+title = "AnonCreds credential offer"
+document = "aries/attachment-formats"
+section = "rfc0771"
+[[format.use]]
+message = "offer-credential"
+protocols = ["https://didcomm.org/issue-credential/2.0", "https://didcomm.org/issue-credential/3.0"]
+
+[[format]]
+id = "anoncreds/credential-request@v1.0"
+title = "AnonCreds credential request"
+document = "aries/attachment-formats"
+section = "rfc0771"
+[[format.use]]
+message = "request-credential"
+protocols = ["https://didcomm.org/issue-credential/2.0", "https://didcomm.org/issue-credential/3.0"]
+
+[[format]]
+id = "anoncreds/credential@v1.0"
+title = "AnonCreds credential"
+document = "aries/attachment-formats"
+section = "rfc0771"
+[[format.use]]
+message = "issue-credential"
+protocols = ["https://didcomm.org/issue-credential/2.0", "https://didcomm.org/issue-credential/3.0"]
+
+[[format]]
+id = "anoncreds/proof-request@v1.0"
+title = "AnonCreds proof request"
+document = "aries/attachment-formats"
+section = "rfc0771"
+[[format.use]]
+message = "propose-presentation"
+protocols = ["https://didcomm.org/present-proof/2.0", "https://didcomm.org/present-proof/3.0"]
+[[format.use]]
+message = "request-presentation"
+protocols = ["https://didcomm.org/present-proof/2.0", "https://didcomm.org/present-proof/3.0"]
+
+[[format]]
+id = "anoncreds/proof@v1.0"
+title = "AnonCreds proof"
+document = "aries/attachment-formats"
+section = "rfc0771"
+[[format.use]]
+message = "presentation"
+protocols = ["https://didcomm.org/present-proof/2.0", "https://didcomm.org/present-proof/3.0"]
+
+[[format]]
+id = "aries/ld-proof-vc-detail@v1.0"
+title = "JSON-LD credential detail (Linked Data Proof)"
+document = "aries/attachment-formats"
+section = "rfc0593"
+[[format.use]]
+message = "propose-credential"
+protocols = ["https://didcomm.org/issue-credential/2.0", "https://didcomm.org/issue-credential/3.0"]
+[[format.use]]
+message = "offer-credential"
+protocols = ["https://didcomm.org/issue-credential/2.0", "https://didcomm.org/issue-credential/3.0"]
+[[format.use]]
+message = "request-credential"
+protocols = ["https://didcomm.org/issue-credential/2.0", "https://didcomm.org/issue-credential/3.0"]
+
+[[format]]
+id = "aries/ld-proof-vc@v1.0"
+title = "JSON-LD verifiable credential (Linked Data Proof)"
+document = "aries/attachment-formats"
+section = "rfc0593"
+[[format.use]]
+message = "issue-credential"
+protocols = ["https://didcomm.org/issue-credential/2.0", "https://didcomm.org/issue-credential/3.0"]
+
+[[format]]
+id = "didcomm/w3c-di-vc-offer@v0.1"
+title = "W3C VC (Data Integrity) offer"
+document = "aries/attachment-formats"
+section = "rfc0809"
+[[format.use]]
+message = "offer-credential"
+protocols = ["https://didcomm.org/issue-credential/2.0", "https://didcomm.org/issue-credential/3.0"]
+
+[[format]]
+id = "didcomm/w3c-di-vc-request@v0.1"
+title = "W3C VC (Data Integrity) request"
+document = "aries/attachment-formats"
+section = "rfc0809"
+[[format.use]]
+message = "request-credential"
+protocols = ["https://didcomm.org/issue-credential/2.0", "https://didcomm.org/issue-credential/3.0"]
+
+[[format]]
+id = "didcomm/w3c-di-vc@v0.1"
+title = "W3C VC (Data Integrity)"
+document = "aries/attachment-formats"
+section = "rfc0809"
+[[format.use]]
+message = "issue-credential"
+protocols = ["https://didcomm.org/issue-credential/2.0", "https://didcomm.org/issue-credential/3.0"]
+
+[[format]]
+id = "didcomm/w3c-vc-sd-jwt-offer@v1.0"
+title = "W3C VC (SD-JWT) offer"
+document = "aries/attachment-formats"
+section = "rfc0881"
+[[format.use]]
+message = "offer-credential"
+protocols = ["https://didcomm.org/issue-credential/2.0", "https://didcomm.org/issue-credential/3.0"]
+
+[[format]]
+id = "didcomm/w3c-vc-sd-jwt-request@v1.0"
+title = "W3C VC (SD-JWT) request"
+document = "aries/attachment-formats"
+section = "rfc0881"
+[[format.use]]
+message = "request-credential"
+protocols = ["https://didcomm.org/issue-credential/2.0", "https://didcomm.org/issue-credential/3.0"]
+
+[[format]]
+id = "didcomm/w3c-vc-sd-jwt@v1.0"
+title = "W3C VC (SD-JWT)"
+document = "aries/attachment-formats"
+section = "rfc0881"
+[[format.use]]
+message = "issue-credential"
+protocols = ["https://didcomm.org/issue-credential/2.0", "https://didcomm.org/issue-credential/3.0"]
+
+[[format]]
+id = "dif/presentation-exchange/definitions@v1.0"
+title = "DIF Presentation Exchange definition"
+document = "aries/attachment-formats"
+section = "rfc0510"
+[[format.use]]
+message = "propose-presentation"
+protocols = ["https://didcomm.org/present-proof/2.0", "https://didcomm.org/present-proof/3.0"]
+[[format.use]]
+message = "request-presentation"
+protocols = ["https://didcomm.org/present-proof/2.0", "https://didcomm.org/present-proof/3.0"]
+
+[[format]]
+id = "dif/presentation-exchange/submission@v1.0"
+title = "DIF Presentation Exchange submission"
+document = "aries/attachment-formats"
+section = "rfc0510"
+[[format.use]]
+message = "presentation"
+protocols = ["https://didcomm.org/present-proof/2.0", "https://didcomm.org/present-proof/3.0"]
+
+[[format]]
+id = "dif/credential-manifest@v1.0"
+title = "DIF Credential Manifest"
+document = "aries/attachment-formats"
+section = "rfc0511"
+[[format.use]]
+message = "propose-credential"
+protocols = ["https://didcomm.org/issue-credential/2.0"]
+[[format.use]]
+message = "offer-credential"
+protocols = ["https://didcomm.org/issue-credential/2.0"]
+[[format.use]]
+message = "request-credential"
+protocols = ["https://didcomm.org/issue-credential/2.0"]
+
+[[format]]
+id = "dif/credential-manifest/manifest@v1.0"
+title = "DIF Credential Manifest"
+document = "waci-didcomm"
+[[format.use]]
+message = "offer-credential"
+protocols = ["https://didcomm.org/issue-credential/3.0"]
+
+[[format]]
+id = "dif/credential-manifest/application@v1.0"
+title = "DIF Credential Application"
+document = "waci-didcomm"
+[[format.use]]
+message = "request-credential"
+protocols = ["https://didcomm.org/issue-credential/3.0"]
+
+[[format]]
+id = "dif/credential-manifest/fulfillment@v1.0"
+title = "DIF Credential Fulfillment"
+document = "waci-didcomm"
+[[format.use]]
+message = "issue-credential"
+protocols = ["https://didcomm.org/issue-credential/3.0"]
