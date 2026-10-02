@@ -4,7 +4,7 @@
 #   docker build -t documentation-server .
 #
 # Optional build secrets:
-#   github_token -- needed while wyvrn-cloud/didcomm (a git dependency) is private:
+#   github_token -- only if a git dependency is private (wyvrn-cloud/didcomm is public):
 #                   --secret id=github_token,env=GITHUB_TOKEN
 #   ca_bundle    -- extra CA certificates, for building behind a TLS-intercepting proxy:
 #                   --secret id=ca_bundle,src=/path/to/ca.pem

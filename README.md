@@ -37,11 +37,10 @@ docker build -t documentation-server .
 docker run -p 8080:8080 -v docserver-data:/app/data documentation-server
 ```
 
-The volume keeps the identity, and with it the DID, across restarts. While
-`wyvrn-cloud/didcomm` (a git dependency) is private, the build needs a GitHub token:
-`docker build --secret id=github_token,env=GITHUB_TOKEN ...`. Behind a TLS-intercepting
-proxy, pass its CA too: `--secret id=ca_bundle,src=ca.pem`. If that proxy listens on
-localhost, also add `--network=host`. Neither secret ends up in an image layer.
+The volume keeps the identity, and with it the DID, across restarts. Behind a
+TLS-intercepting proxy, pass its CA to the build: `--secret id=ca_bundle,src=ca.pem`. If
+that proxy listens on localhost, also add `--network=host`. A `github_token` secret is
+available for private git dependencies. No secret ends up in an image layer.
 
 ## Configuration
 
@@ -110,6 +109,11 @@ cargo test
   against the published `documentation/1.0` schemas.
 - `DOCSERVER_URL=http://host:port/ cargo test --test server -- --ignored` smoke-tests a
   running server or deployment.
+
+CI (`.github/workflows/ci.yml`) runs `cargo test` and a `docker build` on every pull
+request. To also validate replies against the published `documentation/1.0` schemas in
+CI, add a `WYVRN_READ_TOKEN` repository secret: a token that can read
+`wyvrn-cloud/protocols`.
 
 See [`PLAN.md`](PLAN.md) for the design, and the system-wide plan in
 [`mcp/PLAN.md`](https://github.com/wyvrn-cloud/mcp/blob/master/PLAN.md).

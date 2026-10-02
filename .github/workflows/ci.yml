@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: cargo test
+    runs-on: ubuntu-24.04
+    env:
+      # Optional: a token that can read wyvrn-cloud/protocols (private). With it, the
+      # server tests also validate every reply against the published
+      # documentation/1.0 schemas; without it, that check is skipped.
+      WYVRN_READ_TOKEN: ${{ secrets.WYVRN_READ_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Check out wyvrn-cloud/protocols (published documentation/1.0 schemas)
+        if: env.WYVRN_READ_TOKEN != ''
+        uses: actions/checkout@v4
+        with:
+          repository: wyvrn-cloud/protocols
+          token: ${{ secrets.WYVRN_READ_TOKEN }}
+          path: .ci/protocols
+      - if: env.WYVRN_READ_TOKEN != ''
+        run: echo "DOCUMENTATION_SCHEMAS=$GITHUB_WORKSPACE/.ci/protocols/protocols/documentation/1.0/schemas" >> "$GITHUB_ENV"
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test --locked
+
+  docker:
+    name: docker build
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
