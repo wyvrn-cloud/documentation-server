@@ -314,7 +314,7 @@ impl Index {
             match source.kind {
                 SourceKind::ProtocolRegistry => index.index_registry(source, &revisions, &mappings, &mut schemas),
                 SourceKind::DidcommSpec => index.index_spec(source, &revisions),
-                SourceKind::AriesRfcs => index.index_aries(source, &revisions),
+                SourceKind::Rfcs => index.index_rfcs(source, &revisions),
             }
         }
         index.attach_schemas(schemas);
@@ -516,6 +516,39 @@ impl Index {
                 didcomm_versions,
             };
             self.add_document(SPEC, "DIDComm Messaging Specification", &[], doc);
+        }
+        self.index_extensions(source, revision);
+    }
+
+    /// The spec's extensions (`extensions/<name>/main.md`), each the document
+    /// `extension/<name>`. They're unversioned (`current`) and apply to DIDComm v2.
+    fn index_extensions(&mut self, source: &SourceConfig, revision: Option<String>) {
+        let v2 = vec![Envelope::V2.range().to_string()];
+        for dir in read_dir_sorted(&source.path.join("extensions")) {
+            let main = dir.join("main.md");
+            let text = match std::fs::read_to_string(&main) {
+                Ok(t) => t,
+                Err(e) => {
+                    self.warnings.push(format!("{}: {e}", main.display()));
+                    continue;
+                }
+            };
+            let name = dir.file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_default();
+            let sections = markdown::sections(&text);
+            let title = sections
+                .iter()
+                .find(|s| s.level == 1)
+                .map(|s| s.title.clone())
+                .unwrap_or_else(|| format!("DIDComm {name} extension"));
+            let doc = SpecDoc {
+                version: CURRENT.to_string(),
+                title: title.clone(),
+                source: SourceRef { name: source.name.clone(), path: relative(&main, &source.path), revision: revision.clone() },
+                // The title's section would repeat the whole document.
+                sections: sections.into_iter().filter(|s| s.level > 1).collect(),
+                didcomm_versions: v2.clone(),
+            };
+            self.add_document(&format!("extension/{name}"), &title, &v2, doc);
         }
     }
 

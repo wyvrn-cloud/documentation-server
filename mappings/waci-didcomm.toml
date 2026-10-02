@@ -1,0 +1,22 @@
+# What the server reads from decentralized-identity/waci-didcomm (sources/waci-didcomm):
+# the DIDComm v2 versions of issue-credential and present-proof that the WACI-DIDComm
+# Interop Profile ("WACI PEx") uses, and the profile itself. Same format as
+# mappings/aries-rfcs.toml. These replace didcomm.org's pages for the same PIURIs,
+# which only link here.
+
+[[protocol]]
+piuri = "https://didcomm.org/issue-credential/3.0"
+rfc = "issue_credential"
+substitute = { "%VER" = "3.0" }
+
+[[protocol]]
+piuri = "https://didcomm.org/present-proof/3.0"
+rfc = "present_proof/present-proof-v3.md"
+substitute = { "%VER" = "3.0" }
+
+[[document]]
+id = "waci-didcomm"
+version = "1.0"
+title = "WACI-DIDComm Interop Profile v1.0"
+didcomm_versions = ["^2.0"]
+rfcs = ["spec/v1.0/spec.md"]

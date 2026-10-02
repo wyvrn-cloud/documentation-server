@@ -10,3 +10,7 @@
 	path = sources/aries-rfcs
 	url = https://github.com/hyperledger/aries-rfcs
 	shallow = true
+[submodule "sources/waci-didcomm"]
+	path = sources/waci-didcomm
+	url = https://github.com/decentralized-identity/waci-didcomm
+	shallow = true

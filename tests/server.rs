@@ -187,12 +187,32 @@ async fn didcomm_v1_protocols_and_spec_come_from_the_aries_rfcs() {
 }
 
 #[tokio::test]
+async fn extensions_are_served_as_documents() {
+    let (did, _) = start(DidMethod::Peer).await;
+
+    let toc = ask(&did, registry::SPEC_REQUEST, json!({"document": "extension/return_route"})).await.unwrap();
+    assert_eq!(toc["body"]["version"], "current");
+    assert_eq!(toc["body"]["didcomm_versions"], json!(["^2.0"]));
+    let ids: Vec<_> = toc["body"]["documents"].as_array().unwrap().iter().map(|d| d["id"].as_str().unwrap()).collect();
+    assert!(ids.contains(&"extension/l10n") && ids.contains(&"spec") && ids.contains(&"waci-didcomm"), "{ids:?}");
+
+    let scope = ask(&did, registry::SPEC_REQUEST, json!({"document": "extension/l10n", "section": "scope"})).await.unwrap();
+    assert!(scope["body"]["section"]["markdown"].as_str().unwrap().contains("accept-lang"));
+}
+
+#[tokio::test]
 async fn unknown_things_are_problem_reports() {
     let (did, _) = start(DidMethod::Peer).await;
 
     let not_found = ask(&did, registry::REQUEST, json!({"piuri": "https://didcomm.org/escrow/1.0"})).await;
     match not_found {
         Err(AgentError::Problem { code, .. }) => assert_eq!(code, "e.p.not-found.protocol"),
+        other => panic!("expected a problem report, got {other:?}"),
+    }
+
+    let no_document = ask(&did, registry::SPEC_REQUEST, json!({"document": "extension/telepathy"})).await;
+    match no_document {
+        Err(AgentError::Problem { code, .. }) => assert_eq!(code, "e.p.not-found.document"),
         other => panic!("expected a problem report, got {other:?}"),
     }
 

@@ -5,7 +5,7 @@
 # list, fails them (fix with mappings/piuri-paths.toml, mappings/aries-rfcs.toml or schemas/).
 set -eu
 cd "$(dirname "$0")/.."
-git submodule update --init --remote --depth 1 sources/didcomm.org sources/didcomm-messaging sources/aries-rfcs
+git submodule update --init --remote --depth 1 sources/didcomm.org sources/didcomm-messaging sources/aries-rfcs sources/waci-didcomm
 git submodule status
 # Record the new commits for the container image, which has no .git to ask.
 {
@@ -15,6 +15,7 @@ git submodule status
   echo "\"didcomm.org\" = \"$(git -C sources/didcomm.org rev-parse HEAD)\""
   echo "\"didcomm-messaging\" = \"$(git -C sources/didcomm-messaging rev-parse HEAD)\""
   echo "\"aries-rfcs\" = \"$(git -C sources/aries-rfcs rev-parse HEAD)\""
+  echo "\"waci-didcomm\" = \"$(git -C sources/waci-didcomm rev-parse HEAD)\""
 } > sources/revisions.toml
 cargo test --test index
 echo "Commit the new submodule commits if the tests pass: git add sources && git commit"
