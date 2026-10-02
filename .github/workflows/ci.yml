@@ -19,13 +19,13 @@ jobs:
     env:
       # Optional: a token that can read wyvrn-cloud/protocols (private). With it, the
       # server tests also validate every reply against the published
-      # documentation/1.0 schemas; without it, that check is skipped.
+      # documentation schemas; without it, that check is skipped.
       WYVRN_READ_TOKEN: ${{ secrets.WYVRN_READ_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: true
-      - name: Check out wyvrn-cloud/protocols (published documentation/1.0 schemas)
+      - name: Check out wyvrn-cloud/protocols (published documentation schemas)
         if: env.WYVRN_READ_TOKEN != ''
         uses: actions/checkout@v4
         with:
@@ -33,7 +33,7 @@ jobs:
           token: ${{ secrets.WYVRN_READ_TOKEN }}
           path: .ci/protocols
       - if: env.WYVRN_READ_TOKEN != ''
-        run: echo "DOCUMENTATION_SCHEMAS=$GITHUB_WORKSPACE/.ci/protocols/protocols/documentation/1.0/schemas" >> "$GITHUB_ENV"
+        run: echo "DOCUMENTATION_SCHEMAS=$GITHUB_WORKSPACE/.ci/protocols/protocols/documentation" >> "$GITHUB_ENV"
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo test --locked

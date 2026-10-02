@@ -2,8 +2,8 @@
 //! (`didcomm-agent`) as the requester, over the real sources.
 //!
 //! If a checkout of wyvrn-cloud/protocols sits next to this repository (or
-//! `DOCUMENTATION_SCHEMAS` points at its `protocols/documentation/1.0/schemas`), every
-//! reply is also validated against the published documentation/1.0 schemas.
+//! `DOCUMENTATION_SCHEMAS` points at its `protocols/documentation` folder), every reply
+//! is also validated against the published schemas of its documentation version.
 
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -40,13 +40,16 @@ fn client() -> Agent {
     Agent::new(Identity::generate().unwrap()).unwrap()
 }
 
-/// The published documentation/1.0 schemas, if a protocols checkout is available.
+/// The published schema for a documentation message type (1.0 or 1.1), if a protocols
+/// checkout is available.
 fn documentation_schema(message_type: &str) -> Option<jsonschema::Validator> {
     let dir = std::env::var_os("DOCUMENTATION_SCHEMAS")
         .map(PathBuf::from)
-        .unwrap_or_else(|| PathBuf::from("../protocols/protocols/documentation/1.0/schemas"));
-    let name = message_type.rsplit('/').next()?;
-    let schema: Value = serde_json::from_str(&std::fs::read_to_string(dir.join(format!("{name}.json"))).ok()?).ok()?;
+        .unwrap_or_else(|| PathBuf::from("../protocols/protocols/documentation"));
+    let (piuri, name) = message_type.rsplit_once('/')?;
+    let version = piuri.strip_prefix("https://wyvrn.app/documentation/")?;
+    let path = dir.join(version).join("schemas").join(format!("{name}.json"));
+    let schema: Value = serde_json::from_str(&std::fs::read_to_string(path).ok()?).ok()?;
     Some(jsonschema::validator_for(&schema).unwrap())
 }
 
@@ -120,6 +123,44 @@ async fn spec_sections_are_served() {
 }
 
 #[tokio::test]
+async fn documentation_1_0_requesters_still_get_1_0_replies() {
+    let (did, _) = start(DidMethod::Peer).await;
+
+    let catalog = ask(&did, "https://wyvrn.app/documentation/1.0/query", json!({"text": "mediation"})).await.unwrap();
+    assert_eq!(catalog["type"], "https://wyvrn.app/documentation/1.0/catalog");
+    let spec = ask(&did, "https://wyvrn.app/documentation/1.0/spec-request", json!({"version": "2.0"})).await.unwrap();
+    assert_eq!(spec["type"], "https://wyvrn.app/documentation/1.0/spec-response");
+    let response = ask(&did, "https://wyvrn.app/documentation/1.0/request", json!({"piuri": "https://didcomm.org/trust-ping/2.0"}))
+        .await
+        .unwrap();
+    assert!(response["body"]["messages"][0]["schema"].is_object());
+}
+
+#[tokio::test]
+async fn didcomm_versions_are_reported_and_filtered() {
+    let (did, _) = start(DidMethod::Peer).await;
+
+    let v2 = ask(&did, registry::QUERY, json!({"match": "https://didcomm.org/coordinate-mediation/*", "didcomm_version": "2.1"}))
+        .await
+        .unwrap();
+    let entries = v2["body"]["entries"].as_array().unwrap();
+    assert!(entries.iter().any(|e| e["piuri"] == "https://didcomm.org/coordinate-mediation/3.0"));
+    assert!(entries.iter().all(|e| e["didcomm_versions"].as_array().unwrap().iter().any(|r| r == "^2.0")));
+
+    let response = ask(&did, registry::REQUEST, json!({"piuri": "https://didcomm.org/trust-ping/2.0", "sections": []}))
+        .await
+        .unwrap();
+    let ping = &response["body"]["messages"][0];
+    assert_eq!(ping["didcomm_versions"], json!(["^2.0"]));
+    assert_eq!(ping["schemas"][0]["didcomm_versions"], json!(["^2.0"]));
+    assert_eq!(ping["schemas"][0]["schema"], ping["schema"]);
+
+    let toc = ask(&did, registry::SPEC_REQUEST, json!({})).await.unwrap();
+    let spec = toc["body"]["documents"].as_array().unwrap().iter().find(|d| d["id"] == "spec").unwrap().clone();
+    assert_eq!(spec["versions"], json!(["2.1", "2.0", "editors-draft"]));
+}
+
+#[tokio::test]
 async fn unknown_things_are_problem_reports() {
     let (did, _) = start(DidMethod::Peer).await;
 
@@ -149,7 +190,10 @@ async fn discloses_the_registry_role_and_answers_pings() {
         .unwrap();
     assert_eq!(
         disclose.message["body"]["disclosures"],
-        json!([{"feature-type": "protocol", "id": registry::DOCUMENTATION, "roles": ["registry"]}])
+        json!([
+            {"feature-type": "protocol", "id": registry::DOCUMENTATION, "roles": ["registry"]},
+            {"feature-type": "protocol", "id": registry::DOCUMENTATION_1_0, "roles": ["registry"]},
+        ])
     );
 
     let pong = client().request(&did, &json!({"type": features::TRUST_PING_PING, "body": {}})).await.unwrap();

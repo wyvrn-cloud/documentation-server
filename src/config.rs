@@ -69,6 +69,10 @@ pub struct SourceConfig {
     /// `index.revisions` (e.g. in a
     /// container image built without `.git`).
     pub revision: Option<String>,
+    /// `didcomm_versions` for every protocol in this source whose definition doesn't
+    /// declare its own (e.g. `["^1.0"]` for the Aries RFCs). Unset = work them out from
+    /// each protocol's examples and schemas.
+    pub didcomm_versions: Option<Vec<String>>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]

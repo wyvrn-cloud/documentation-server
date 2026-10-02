@@ -1,7 +1,10 @@
 //! The index over the real sources (the submodules) with the repository's own
 //! `config/default.toml`. Needs `git submodule update --init`.
 
-use documentation_server::{config::Config, index::Index};
+use documentation_server::{
+    config::Config,
+    index::{Envelope, Index},
+};
 
 fn index() -> Index {
     Index::build(&Config::load("config/default.toml").unwrap())
@@ -37,10 +40,11 @@ fn mismatched_folders_are_indexed_by_piuri() {
 #[test]
 fn serves_every_spec_version() {
     let index = index();
-    let versions: Vec<_> = index.specs.keys().map(String::as_str).collect();
-    assert_eq!(versions, ["2.0", "2.1", "editors-draft"]);
+    let spec = &index.documents["spec"];
+    assert_eq!(spec.versions_newest_first(), ["2.1", "2.0", "editors-draft"]);
     assert_eq!(index.resolve_spec(None).unwrap().version, "2.1");
-    for spec in index.specs.values() {
+    assert_eq!(spec.versions["2.0"].didcomm_versions, ["~2.0"]);
+    for spec in spec.versions.values() {
         assert!(spec.sections.iter().any(|s| s.id == "message-headers"), "{} lacks message-headers", spec.version);
         assert!(spec.sections.len() > 100);
     }
@@ -63,7 +67,8 @@ fn core_protocols_have_their_schemas() {
     }
     let mediation = &index.protocols["https://didcomm.org/coordinate-mediation/3.0"];
     assert_eq!(mediation.roles, ["mediator", "recipient"]);
-    assert_eq!(mediation.messages.iter().filter(|m| m.schema.is_some()).count(), 7);
+    assert_eq!(mediation.messages.iter().filter(|m| m.schema().is_some()).count(), 7);
+    assert_eq!(mediation.didcomm_versions(), ["^2.0"]);
 }
 
 /// Every schema compiles. Upstream examples are checked against them and mismatches
@@ -75,13 +80,15 @@ fn schemas_compile_and_examples_are_reported() {
     let (mut checked, mut mismatched) = (0, Vec::new());
     for doc in index.protocols.values() {
         for message in &doc.messages {
-            let Some(schema) = &message.schema else { continue };
-            let validator = jsonschema::validator_for(schema)
-                .unwrap_or_else(|e| panic!("schema for {} doesn't compile: {e}", message.message_type));
-            for example in message.examples.iter().filter(|e| e.get("type").is_some()) {
-                checked += 1;
-                if let Some(error) = validator.iter_errors(example).next() {
-                    mismatched.push(format!("{}: {error}", message.message_type));
+            for versioned in &message.schemas {
+                let validator = jsonschema::validator_for(&versioned.schema)
+                    .unwrap_or_else(|e| panic!("schema for {} doesn't compile: {e}", message.message_type));
+                let examples = message.examples.iter().filter(|e| Envelope::of_message(e) == Some(versioned.envelope));
+                for example in examples {
+                    checked += 1;
+                    if let Some(error) = validator.iter_errors(example).next() {
+                        mismatched.push(format!("{} ({:?}): {error}", message.message_type, versioned.envelope));
+                    }
                 }
             }
         }

@@ -36,7 +36,7 @@ async fn main() -> anyhow::Result<()> {
     }
     tracing::info!(
         protocols = index.protocols.len(),
-        specs = ?index.specs.keys().collect::<Vec<_>>(),
+        documents = ?index.documents.values().map(|d| format!("{} {:?}", d.id, d.versions_newest_first())).collect::<Vec<_>>(),
         warnings = index.warnings.len(),
         "index built"
     );

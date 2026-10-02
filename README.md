@@ -2,8 +2,10 @@
 
 A DIDComm v2 agent that serves DIDComm protocol documentation, the DIDComm Messaging
 specification, and JSON Schemas over DIDComm itself, using the
-[`https://wyvrn.app/documentation/1.0`](https://github.com/wyvrn-cloud/protocols/blob/master/protocols/documentation/1.0/readme.md)
-protocol. It's the registry the [`mcp`](https://github.com/wyvrn-cloud/mcp) bridge
+[`https://wyvrn.app/documentation/1.1`](https://github.com/wyvrn-cloud/protocols/blob/master/protocols/documentation/1.1/readme.md)
+protocol. It still answers
+[`1.0`](https://github.com/wyvrn-cloud/protocols/blob/master/protocols/documentation/1.0/readme.md)
+requests, in 1.0. It's the registry the [`mcp`](https://github.com/wyvrn-cloud/mcp) bridge
 asks when an AI agent needs to learn a protocol on the fly.
 
 It serves:
@@ -11,13 +13,18 @@ It serves:
   - metadata
   - prose sections, which requesters can ask for one at a time
   - example messages grouped by message type
-  - JSON Schemas where we have them
-- **The DIDComm Messaging spec** (v2.0, v2.1 and the editor's draft): a table of
-  contents, plus any single section.
+  - JSON Schemas where we have them, one per DIDComm envelope style (v1 or v2)
+  - which DIDComm versions it's used with (`didcomm_versions`, e.g. `["^2.0"]`), from
+    its frontmatter, its source's configuration, or else its examples and schemas
+  - aliases: legacy `did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/` types are accepted everywhere,
+    and `mappings/piuri-paths.toml` can name more
+- **Documents**: the DIDComm Messaging spec (`spec`: v2.0, v2.1 and the editor's
+  draft): a table of contents, plus any single section. The table of contents lists
+  every document served.
 - **Hand-written JSON Schemas** for the core protocols. didcomm.org has none, so they
   live in [`schemas/`](schemas/).
-- Answers to `discover-features/2.0` (it discloses `documentation/1.0` with role
-  `registry`) and `trust-ping/2.0`.
+- Answers to `discover-features/2.0` (it discloses `documentation/1.1` and `1.0` with
+  role `registry`) and `trust-ping/2.0`.
 
 ## Running it
 
@@ -94,7 +101,7 @@ that no longer matches a protocol.
 cargo test
 ```
 
-- Unit tests cover the Markdown parsing, the index, and every `documentation/1.0`
+- Unit tests cover the Markdown parsing, the index, and every `documentation`
   request and problem path.
 - `tests/index.rs` checks the real sources:
   - everything is indexed
@@ -105,13 +112,13 @@ cargo test
     content it couldn't parse (11 examples that aren't even JSON5, today)
 - `tests/server.rs` runs the server over HTTP with a real DIDComm client. If a checkout
   of `wyvrn-cloud/protocols` sits next to this repository, or `DOCUMENTATION_SCHEMAS`
-  points at its `protocols/documentation/1.0/schemas`, every reply is also validated
-  against the published `documentation/1.0` schemas.
+  points at its `protocols/documentation`, every reply is also validated
+  against the published schemas of its documentation version.
 - `DOCSERVER_URL=http://host:port/ cargo test --test server -- --ignored` smoke-tests a
   running server or deployment.
 
 CI (`.github/workflows/ci.yml`) runs `cargo test` and a `docker build` on every pull
-request. To also validate replies against the published `documentation/1.0` schemas in
+request. To also validate replies against the published `documentation` schemas in
 CI, add a `WYVRN_READ_TOKEN` repository secret: a token that can read
 `wyvrn-cloud/protocols`.
 
