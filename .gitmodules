@@ -1,0 +1,8 @@
+[submodule "sources/didcomm.org"]
+	path = sources/didcomm.org
+	url = https://github.com/decentralized-identity/didcomm.org
+	shallow = true
+[submodule "sources/didcomm-messaging"]
+	path = sources/didcomm-messaging
+	url = https://github.com/decentralized-identity/didcomm-messaging
+	shallow = true

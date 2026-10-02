@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "out-of-band/2.0/invitation",
+  "description": "Out-of-band invitation, usually carried in a URL (_oob parameter) or QR code. Its id is the pthid of replies. Defined in the DIDComm Messaging spec, section Out Of Band Messages.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "from"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/out-of-band/2.0/invitation"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "goal_code": {
+          "type": "string"
+        },
+        "goal": {
+          "type": "string"
+        },
+        "accept": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Accepted media types / DIDComm profiles, in order of preference, e.g. didcomm/v2."
+        }
+      }
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/attachment"
+      }
+    }
+  },
+  "$defs": {
+    "attachment": {
+      "type": "object",
+      "required": [
+        "data"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._~-]+$"
+        },
+        "description": {
+          "type": "string"
+        },
+        "filename": {
+          "type": "string"
+        },
+        "media_type": {
+          "type": "string"
+        },
+        "format": {
+          "type": "string"
+        },
+        "lastmod_time": {
+          "type": [
+            "integer",
+            "string"
+          ]
+        },
+        "byte_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "data": {
+          "type": "object",
+          "anyOf": [
+            {
+              "required": [
+                "jws"
+              ]
+            },
+            {
+              "required": [
+                "hash"
+              ]
+            },
+            {
+              "required": [
+                "links"
+              ]
+            },
+            {
+              "required": [
+                "base64"
+              ]
+            },
+            {
+              "required": [
+                "json"
+              ]
+            }
+          ],
+          "properties": {
+            "jws": {
+              "type": "object"
+            },
+            "hash": {
+              "type": "string"
+            },
+            "links": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "base64": {
+              "type": "string"
+            },
+            "json": {}
+          }
+        }
+      }
+    }
+  }
+}

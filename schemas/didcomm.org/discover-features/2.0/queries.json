@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "discover-features/2.0/queries",
+  "description": "Asks the responder which features (protocols, goal codes, headers, ...) it supports. Defined in the DIDComm Messaging spec, section Discover Features Protocol 2.0.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/discover-features/2.0/queries"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "required": [
+        "queries"
+      ],
+      "properties": {
+        "queries": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "feature-type",
+              "match"
+            ],
+            "properties": {
+              "feature-type": {
+                "type": "string",
+                "description": "protocol, goal-code, header, or another feature type; unrecognized values are ignored.",
+                "examples": [
+                  "protocol",
+                  "goal-code",
+                  "header"
+                ]
+              },
+              "match": {
+                "type": "string",
+                "description": "Feature identifier to match; * is a wildcard (a lone * matches everything)."
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
