@@ -314,6 +314,7 @@ impl Index {
             match source.kind {
                 SourceKind::ProtocolRegistry => index.index_registry(source, &revisions, &mappings, &mut schemas),
                 SourceKind::DidcommSpec => index.index_spec(source, &revisions),
+                SourceKind::AriesRfcs => index.index_aries(source, &revisions),
             }
         }
         index.attach_schemas(schemas);
@@ -617,34 +618,7 @@ pub fn parse_protocol(
     let sections = markdown::sections(body);
     let roles = sections.iter().find(|s| s.id == "roles").map(|s| roles(&s.markdown)).unwrap_or_default();
 
-    let prefix = format!("{piuri}/");
-    let mut messages: Vec<MessageType> = Vec::new();
-    for block in markdown::code_blocks(body) {
-        let trimmed = block.trim_start();
-        if !trimmed.starts_with('{') {
-            continue;
-        }
-        let example: Value = match json5::from_str(&block) {
-            Ok(v) => v,
-            Err(_) => {
-                if block.contains(&prefix) {
-                    warnings.push(format!("an example of {piuri} isn't parseable as JSON5"));
-                }
-                continue;
-            }
-        };
-        let Some(message_type) = example["type"].as_str().or_else(|| example["@type"].as_str()) else {
-            continue;
-        };
-        let message_type = canonical_type(&normalize_type(message_type), aliases);
-        if !message_type.starts_with(&prefix) {
-            continue; // e.g. a discover-features exchange shown inside another protocol
-        }
-        match messages.iter_mut().find(|m| m.message_type == message_type) {
-            Some(m) => m.examples.push(example),
-            None => messages.push(MessageType { message_type, examples: vec![example], ..MessageType::default() }),
-        }
-    }
+    let messages = group_examples(&piuri, markdown::code_blocks(body), aliases, &[], &mut warnings);
 
     let nonempty = |s: Option<String>| s.filter(|s| !s.trim().is_empty());
     let doc = ProtocolDoc {
@@ -671,8 +645,74 @@ pub fn parse_protocol(
     Ok((doc, warnings))
 }
 
+/// The example messages among `blocks` (code blocks, or whole JSON files) that belong to
+/// `piuri`, grouped by message type. A block's type is first rewritten by
+/// `substitute` (placeholder → value), then the legacy prefix and `aliases` are
+/// resolved; the example itself is kept as written.
+pub(crate) fn group_examples(
+    piuri: &str,
+    blocks: impl IntoIterator<Item = String>,
+    aliases: &BTreeMap<String, String>,
+    substitute: &[(String, String)],
+    warnings: &mut Vec<String>,
+) -> Vec<MessageType> {
+    let prefix = format!("{piuri}/");
+    let mut messages: Vec<MessageType> = Vec::new();
+    for block in blocks {
+        let trimmed = block.trim_start();
+        if !trimmed.starts_with('{') {
+            continue;
+        }
+        let resolve = |written: &str| {
+            let mut message_type = written.to_string();
+            for (from, to) in substitute {
+                message_type = message_type.replace(from.as_str(), to);
+            }
+            canonical_type(&normalize_type(&message_type), aliases)
+        };
+        let example: Value = match json5::from_str(&block) {
+            Ok(v) => v,
+            Err(_) => {
+                // Still list the message type, if the broken example names one of ours.
+                if let Some(message_type) = written_type(&block).map(resolve).filter(|t| t.starts_with(&prefix)) {
+                    warnings.push(format!("an example of {message_type} isn't parseable as JSON5"));
+                    if !messages.iter().any(|m| m.message_type == message_type) {
+                        messages.push(MessageType { message_type, ..MessageType::default() });
+                    }
+                } else if block.contains(&prefix) {
+                    warnings.push(format!("an example of {piuri} isn't parseable as JSON5"));
+                }
+                continue;
+            }
+        };
+        let Some(written) = example["type"].as_str().or_else(|| example["@type"].as_str()) else {
+            continue;
+        };
+        let message_type = resolve(written);
+        if !message_type.starts_with(&prefix) {
+            continue; // e.g. a discover-features exchange shown inside another protocol
+        }
+        match messages.iter_mut().find(|m| m.message_type == message_type) {
+            Some(m) => m.examples.push(example),
+            None => messages.push(MessageType { message_type, examples: vec![example], ..MessageType::default() }),
+        }
+    }
+    messages
+}
+
+/// The first `"type"` / `"@type"` string value in text that isn't valid JSON5.
+fn written_type(block: &str) -> Option<&str> {
+    for key in ["\"@type\"", "\"type\""] {
+        if let Some(at) = block.find(key) {
+            let rest = block[at + key.len()..].trim_start().strip_prefix(':')?.trim_start().strip_prefix('"')?;
+            return rest.split_once('"').map(|(value, _)| value);
+        }
+    }
+    None
+}
+
 /// A message type with its protocol part replaced when that's an alias.
-fn canonical_type(message_type: &str, aliases: &BTreeMap<String, String>) -> String {
+pub(crate) fn canonical_type(message_type: &str, aliases: &BTreeMap<String, String>) -> String {
     match message_type.rsplit_once('/') {
         Some((piuri, name)) => match aliases.get(piuri) {
             Some(indexed) => format!("{indexed}/{name}"),
@@ -686,7 +726,7 @@ fn canonical_type(message_type: &str, aliases: &BTreeMap<String, String>) -> Str
 /// (`` - `mediator`: ... ``), only the name leading each item counts, so names merely
 /// mentioned in a description (`` receiving `forward` messages ``) don't; otherwise
 /// every backticked name does (`` two roles: `sender` and `receiver` ``).
-fn roles(section: &str) -> Vec<String> {
+pub(crate) fn roles(section: &str) -> Vec<String> {
     let leading: Vec<String> = section
         .lines()
         .filter_map(|line| line.trim_start().strip_prefix(['-', '*']))
@@ -711,12 +751,12 @@ fn spec_version(title: &str) -> String {
         .unwrap_or_else(|| "editors-draft".to_string())
 }
 
-fn read_toml<T: serde::de::DeserializeOwned>(path: &Path) -> Result<T, String> {
+pub(crate) fn read_toml<T: serde::de::DeserializeOwned>(path: &Path) -> Result<T, String> {
     let text = std::fs::read_to_string(path).map_err(|e| format!("{}: {e}", path.display()))?;
     toml::from_str(&text).map_err(|e| format!("{}: {e}", path.display()))
 }
 
-fn read_dir_sorted(dir: &Path) -> Vec<PathBuf> {
+pub(crate) fn read_dir_sorted(dir: &Path) -> Vec<PathBuf> {
     let mut entries: Vec<PathBuf> = std::fs::read_dir(dir)
         .into_iter()
         .flatten()
@@ -728,7 +768,7 @@ fn read_dir_sorted(dir: &Path) -> Vec<PathBuf> {
     entries
 }
 
-fn walk_json(dir: &Path) -> Vec<PathBuf> {
+pub(crate) fn walk_json(dir: &Path) -> Vec<PathBuf> {
     let mut found = Vec::new();
     let mut stack = vec![dir.to_path_buf()];
     while let Some(dir) = stack.pop() {
@@ -745,14 +785,14 @@ fn walk_json(dir: &Path) -> Vec<PathBuf> {
     found
 }
 
-fn relative(path: &Path, base: &Path) -> String {
+pub(crate) fn relative(path: &Path, base: &Path) -> String {
     path.strip_prefix(base).unwrap_or(path).to_string_lossy().replace('\\', "/")
 }
 
 /// A source's commit: the config's explicit `revision`, else what `git rev-parse` says
 /// (the live truth when there's a checkout), else the `index.revisions` file (for the
 /// container image, which has neither `.git` nor git).
-fn revision(source: &SourceConfig, revisions: &HashMap<String, String>) -> Option<String> {
+pub(crate) fn revision(source: &SourceConfig, revisions: &HashMap<String, String>) -> Option<String> {
     if source.revision.is_some() {
         return source.revision.clone();
     }
@@ -857,6 +897,7 @@ There are two roles: `pinger` and `ponger`.
             piuri_base: None,
             revision: revision.map(str::to_string),
             didcomm_versions: None,
+            manifest: None,
         };
         let revisions = HashMap::from([("upstream".to_string(), "abc123".to_string())]);
 
@@ -945,6 +986,18 @@ status: Adopted
 
         index.add_document("extension/x", "X", &["^2.0".into()], version(CURRENT));
         assert_eq!(index.resolve_document(Some("extension/x"), None).unwrap().1.version, CURRENT);
+    }
+
+    #[test]
+    fn broken_examples_still_name_their_type() {
+        let blocks = vec!["{\n  \"@type\": \"<base>/hello\",\n  \"a\": 1 // no comma\n  \"b\": 2\n}".to_string()];
+        let substitute = [("<base>".to_string(), "https://example.org/p/1.0".to_string())];
+        let mut warnings = Vec::new();
+        let messages = group_examples("https://example.org/p/1.0", blocks, &BTreeMap::new(), &substitute, &mut warnings);
+        assert_eq!(messages.len(), 1);
+        assert_eq!(messages[0].message_type, "https://example.org/p/1.0/hello");
+        assert!(messages[0].examples.is_empty());
+        assert_eq!(warnings, ["an example of https://example.org/p/1.0/hello isn't parseable as JSON5"]);
     }
 
     #[test]

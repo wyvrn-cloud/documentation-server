@@ -157,7 +157,33 @@ async fn didcomm_versions_are_reported_and_filtered() {
 
     let toc = ask(&did, registry::SPEC_REQUEST, json!({})).await.unwrap();
     let spec = toc["body"]["documents"].as_array().unwrap().iter().find(|d| d["id"] == "spec").unwrap().clone();
-    assert_eq!(spec["versions"], json!(["2.1", "2.0", "editors-draft"]));
+    assert_eq!(spec["versions"], json!(["2.1", "2.0", "1.0", "editors-draft"]));
+}
+
+#[tokio::test]
+async fn didcomm_v1_protocols_and_spec_come_from_the_aries_rfcs() {
+    let (did, _) = start(DidMethod::Peer).await;
+
+    let v1 = ask(&did, registry::QUERY, json!({"didcomm_version": "1.0", "text": "pickup"})).await.unwrap();
+    let piuris: Vec<_> = v1["body"]["entries"].as_array().unwrap().iter().map(|e| e["piuri"].as_str().unwrap()).collect();
+    assert!(piuris.contains(&"https://didcomm.org/messagepickup/2.0"), "{piuris:?}");
+    assert!(!piuris.contains(&"https://didcomm.org/messagepickup/3.0"), "v2-only pickup filtered out");
+
+    let ping = ask(&did, registry::REQUEST, json!({"piuri": "https://didcomm.org/trust-ping/1.0/ping", "sections": ["roles"]}))
+        .await
+        .unwrap();
+    let body = &ping["body"];
+    assert_eq!(body["piuri"], "https://didcomm.org/trust_ping/1.0");
+    assert_eq!(body["status"], "Adopted");
+    assert_eq!(body["didcomm_versions"], json!(["^1.0"]));
+    assert_eq!(body["source"]["name"], "aries-rfcs");
+    assert!(body["aliases"].as_array().unwrap().contains(&json!("https://didcomm.org/trust-ping/1.0")));
+
+    let spec = ask(&did, registry::SPEC_REQUEST, json!({"version": "1.0", "section": "rfc0092"})).await.unwrap();
+    assert_eq!(spec["body"]["didcomm_versions"], json!(["^1.0"]));
+    assert!(spec["body"]["section"]["markdown"].as_str().unwrap().contains("return_route"));
+    let formats = ask(&did, registry::SPEC_REQUEST, json!({"document": "aries/attachment-formats"})).await.unwrap();
+    assert!(formats["body"]["toc"].as_array().unwrap().iter().any(|s| s["id"] == "rfc0592"));
 }
 
 #[tokio::test]

@@ -18,9 +18,22 @@ It serves:
     its frontmatter, its source's configuration, or else its examples and schemas
   - aliases: legacy `did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/` types are accepted everywhere,
     and `mappings/piuri-paths.toml` can name more
-- **Documents**: the DIDComm Messaging spec (`spec`: v2.0, v2.1 and the editor's
-  draft): a table of contents, plus any single section. The table of contents lists
-  every document served.
+- **The DIDComm v1 protocols from the [Aries RFCs](https://github.com/hyperledger/aries-rfcs)**
+  (connections, DID Exchange, out-of-band 1.1, issue-credential and present-proof 1.x
+  and 2.0, coordinate-mediation 1.0, pickup 1.0/2.0, trust ping, ...), 40-odd in all,
+  Stalled and Retired ones included. RFCs have no frontmatter, so
+  [`mappings/aries-rfcs.toml`](mappings/aries-rfcs.toml) says which RFC is which
+  PIURI. An RFC replaces a didcomm.org page for the same PIURI that only links to it.
+- **Documents**: a table of contents, plus any single section, of:
+  - `spec`: the DIDComm Messaging spec v2.0, v2.1 and the editor's draft, and `1.0`:
+    DIDComm v1, compiled from the Aries RFCs that define it (threading, decorators,
+    attachments, envelopes, transports, routing, `~l10n`, `~timing`, ACKs, ...), with
+    section ids prefixed by RFC number (`rfc0008`, `rfc0008-threaded-messages`, ...)
+  - `aries/attachment-formats`: the credential attachment formats issue-credential and
+    present-proof 2.0 carry (Indy, AnonCreds, JSON-LD, Data Integrity, SD-JWT, DIF
+    Presentation Exchange, ...)
+
+  The table of contents lists every document served.
 - **Hand-written JSON Schemas** for the core protocols. didcomm.org has none, so they
   live in [`schemas/`](schemas/).
 - Answers to `discover-features/2.0` (it discloses `documentation/1.1` and `1.0` with
@@ -91,9 +104,11 @@ See [`config/default.toml`](config/default.toml). The settings that matter:
 scripts/update-sources.sh
 ```
 
-It moves both submodules to upstream's latest commit and re-runs the index tests. Those
-fail on any new folder/PIURI mismatch (add it to the mappings file) and on any schema
-that no longer matches a protocol.
+It moves the submodules to upstream's latest commit and re-runs the index tests. Those
+fail on any new folder/PIURI mismatch (add it to the mappings file), on any schema that
+no longer matches a protocol, and on any new Aries RFC with example messages that
+`mappings/aries-rfcs.toml` doesn't list (add it as a protocol, to a document, or under
+`[ignore]`).
 
 ## Tests
 
