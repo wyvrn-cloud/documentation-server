@@ -992,7 +992,7 @@ dependencies = [
 [[package]]
 name = "didcomm-agent"
 version = "0.0.1"
-source = "git+https://github.com/wyvrn-cloud/didcomm?branch=claude%2Fadmiring-mayer-68xfrs#d600ea81d72e653c04cbc55f5aa815f7e9f04504"
+source = "git+https://github.com/wyvrn-cloud/didcomm#fbb4b8003bae3b236b8fdb902b0e9e59c24f182b"
 dependencies = [
  "askar-crypto",
  "didcomm-core",
@@ -1009,7 +1009,7 @@ dependencies = [
 [[package]]
 name = "didcomm-core"
 version = "0.0.1"
-source = "git+https://github.com/wyvrn-cloud/didcomm?branch=claude%2Fadmiring-mayer-68xfrs#d600ea81d72e653c04cbc55f5aa815f7e9f04504"
+source = "git+https://github.com/wyvrn-cloud/didcomm#fbb4b8003bae3b236b8fdb902b0e9e59c24f182b"
 dependencies = [
  "async-trait",
  "ciborium",
@@ -1026,7 +1026,7 @@ dependencies = [
 [[package]]
 name = "didcomm-crypto-askar"
 version = "0.0.1"
-source = "git+https://github.com/wyvrn-cloud/didcomm?branch=claude%2Fadmiring-mayer-68xfrs#d600ea81d72e653c04cbc55f5aa815f7e9f04504"
+source = "git+https://github.com/wyvrn-cloud/didcomm#fbb4b8003bae3b236b8fdb902b0e9e59c24f182b"
 dependencies = [
  "askar-crypto",
  "async-trait",
@@ -1041,7 +1041,7 @@ dependencies = [
 [[package]]
 name = "didcomm-diddoc"
 version = "0.0.1"
-source = "git+https://github.com/wyvrn-cloud/didcomm?branch=claude%2Fadmiring-mayer-68xfrs#d600ea81d72e653c04cbc55f5aa815f7e9f04504"
+source = "git+https://github.com/wyvrn-cloud/didcomm#fbb4b8003bae3b236b8fdb902b0e9e59c24f182b"
 dependencies = [
  "serde",
  "serde_json",
@@ -1051,7 +1051,7 @@ dependencies = [
 [[package]]
 name = "didcomm-multiformats"
 version = "0.0.1"
-source = "git+https://github.com/wyvrn-cloud/didcomm?branch=claude%2Fadmiring-mayer-68xfrs#d600ea81d72e653c04cbc55f5aa815f7e9f04504"
+source = "git+https://github.com/wyvrn-cloud/didcomm#fbb4b8003bae3b236b8fdb902b0e9e59c24f182b"
 dependencies = [
  "multibase",
  "thiserror 1.0.69",
@@ -1060,7 +1060,7 @@ dependencies = [
 [[package]]
 name = "didcomm-quickstart"
 version = "0.0.1"
-source = "git+https://github.com/wyvrn-cloud/didcomm?branch=claude%2Fadmiring-mayer-68xfrs#d600ea81d72e653c04cbc55f5aa815f7e9f04504"
+source = "git+https://github.com/wyvrn-cloud/didcomm#fbb4b8003bae3b236b8fdb902b0e9e59c24f182b"
 dependencies = [
  "askar-crypto",
  "didcomm-core",
@@ -1078,7 +1078,7 @@ dependencies = [
 [[package]]
 name = "didcomm-resolver-jwk"
 version = "0.0.1"
-source = "git+https://github.com/wyvrn-cloud/didcomm?branch=claude%2Fadmiring-mayer-68xfrs#d600ea81d72e653c04cbc55f5aa815f7e9f04504"
+source = "git+https://github.com/wyvrn-cloud/didcomm#fbb4b8003bae3b236b8fdb902b0e9e59c24f182b"
 dependencies = [
  "async-trait",
  "didcomm-core",
@@ -1090,7 +1090,7 @@ dependencies = [
 [[package]]
 name = "didcomm-resolver-peer"
 version = "0.0.1"
-source = "git+https://github.com/wyvrn-cloud/didcomm?branch=claude%2Fadmiring-mayer-68xfrs#d600ea81d72e653c04cbc55f5aa815f7e9f04504"
+source = "git+https://github.com/wyvrn-cloud/didcomm#fbb4b8003bae3b236b8fdb902b0e9e59c24f182b"
 dependencies = [
  "async-trait",
  "didcomm-core",
@@ -1103,7 +1103,7 @@ dependencies = [
 [[package]]
 name = "didcomm-resolver-web"
 version = "0.0.1"
-source = "git+https://github.com/wyvrn-cloud/didcomm?branch=claude%2Fadmiring-mayer-68xfrs#d600ea81d72e653c04cbc55f5aa815f7e9f04504"
+source = "git+https://github.com/wyvrn-cloud/didcomm#fbb4b8003bae3b236b8fdb902b0e9e59c24f182b"
 dependencies = [
  "async-trait",
  "didcomm-core",
@@ -1116,7 +1116,7 @@ dependencies = [
 [[package]]
 name = "didcomm-resolver-webvh"
 version = "0.0.1"
-source = "git+https://github.com/wyvrn-cloud/didcomm?branch=claude%2Fadmiring-mayer-68xfrs#d600ea81d72e653c04cbc55f5aa815f7e9f04504"
+source = "git+https://github.com/wyvrn-cloud/didcomm#fbb4b8003bae3b236b8fdb902b0e9e59c24f182b"
 dependencies = [
  "async-trait",
  "didcomm-core",
