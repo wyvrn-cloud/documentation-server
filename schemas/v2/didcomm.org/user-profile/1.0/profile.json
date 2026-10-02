@@ -1,0 +1,178 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "user-profile/1.0/profile",
+  "description": "Sends (or updates) the user's profile. Absent fields are unchanged; null or empty removes one. displayPicture references an attachment. send_back_yours asks for the recipient's profile in return.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/user-profile/1.0/profile"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "profile": {
+          "type": "object",
+          "properties": {
+            "displayName": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "displayPicture": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "#<attachment id>."
+            },
+            "description": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        "send_back_yours": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "profile"
+      ]
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/attachment"
+      },
+      "description": "The picture, when displayPicture references one."
+    }
+  },
+  "$defs": {
+    "attachment": {
+      "type": "object",
+      "required": [
+        "data"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._~-]+$"
+        },
+        "description": {
+          "type": "string"
+        },
+        "filename": {
+          "type": "string"
+        },
+        "media_type": {
+          "type": "string"
+        },
+        "format": {
+          "type": "string"
+        },
+        "lastmod_time": {
+          "type": [
+            "integer",
+            "string"
+          ]
+        },
+        "byte_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "data": {
+          "type": "object",
+          "anyOf": [
+            {
+              "required": [
+                "jws"
+              ]
+            },
+            {
+              "required": [
+                "hash"
+              ]
+            },
+            {
+              "required": [
+                "links"
+              ]
+            },
+            {
+              "required": [
+                "base64"
+              ]
+            },
+            {
+              "required": [
+                "json"
+              ]
+            }
+          ],
+          "properties": {
+            "jws": {
+              "type": "object"
+            },
+            "hash": {
+              "type": "string"
+            },
+            "links": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "base64": {
+              "type": "string"
+            },
+            "json": {}
+          }
+        }
+      }
+    }
+  }
+}

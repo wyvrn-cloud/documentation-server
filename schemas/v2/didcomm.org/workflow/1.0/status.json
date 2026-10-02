@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "workflow/1.0/status",
+  "description": "Asks for an instance's status (with include_actions, include_ui, viewer, ...), or answers with it (state, allowed_events, action_menu, artifacts, ui, assets) on the request's thread.",
+  "type": "object",
+  "required": [
+    "id",
+    "type"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/workflow/1.0/status"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "instance_id": {
+          "type": "string",
+          "description": "The workflow instance's id (thid SHOULD equal it)."
+        },
+        "include_actions": {
+          "type": "boolean"
+        },
+        "include_ui": {
+          "type": "boolean"
+        },
+        "ui_profile": {
+          "type": "string"
+        },
+        "viewer": {
+          "type": "object",
+          "properties": {
+            "role": {
+              "type": "string"
+            },
+            "connection_id": {
+              "type": "string"
+            },
+            "did": {
+              "type": "string"
+            },
+            "participantKey": {
+              "type": "string"
+            }
+          }
+        },
+        "capabilities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "resolve_vault_refs": {
+          "type": "boolean",
+          "default": false
+        },
+        "state": {
+          "type": "string"
+        },
+        "section": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "allowed_events": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "action_menu": {
+          "type": "object"
+        },
+        "artifacts": {
+          "type": "object"
+        },
+        "ui": {},
+        "assets": {}
+      }
+    }
+  }
+}

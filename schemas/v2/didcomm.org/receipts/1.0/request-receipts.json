@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "receipts/1.0/request-receipts",
+  "description": "Says which message receipts the sender wants, by message type (wildcards allowed) and state. Sending it again replaces the preference; an empty array turns receipts off.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/receipts/1.0/request-receipts"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "requested_receipts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "message_type"
+            ],
+            "properties": {
+              "message_type": {
+                "type": "string",
+                "description": "A message type URI, possibly with the * wildcard."
+              },
+              "states": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "received",
+                    "viewed",
+                    "deleted"
+                  ]
+                },
+                "description": "Omitted = every state."
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "requested_receipts"
+      ]
+    }
+  }
+}

@@ -1,0 +1,261 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "payments/1.0/handshake-request",
+  "description": "The payee's single secure reveal: payment terms (invoice, tax) and payee coordinates, or method_ref to a stored method. Sign-then-encrypt is RECOMMENDED.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/payments/1.0/handshake-request"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "session": {
+          "type": "object",
+          "required": [
+            "id"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "ttl": {
+              "type": "string"
+            },
+            "nonce": {
+              "type": "string"
+            }
+          }
+        },
+        "terms": {
+          "type": "object",
+          "description": "What is to be paid. Its JCS-canonical SHA-256 is integrity.terms_sha256 and the receipt's summary_hash.",
+          "required": [
+            "asset",
+            "quantity"
+          ],
+          "properties": {
+            "request_id": {
+              "type": "string"
+            },
+            "asset": {
+              "type": "object",
+              "required": [
+                "caip19"
+              ],
+              "properties": {
+                "caip19": {
+                  "type": "string",
+                  "description": "CAIP-19 asset id."
+                },
+                "decimals": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "quantity": {
+              "type": "string",
+              "pattern": "^[0-9]+$",
+              "description": "Atomic units, the canonical amount."
+            },
+            "display": {
+              "type": "object",
+              "description": "UI only; never used to validate amounts.",
+              "properties": {
+                "currency": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                }
+              }
+            },
+            "invoice": {
+              "type": "object"
+            },
+            "tax": {
+              "type": "object"
+            },
+            "network": {
+              "type": "object",
+              "properties": {
+                "chain": {
+                  "type": "string",
+                  "description": "CAIP-2 chain id."
+                },
+                "confirmations_required": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "fees": {
+              "type": "object"
+            },
+            "partial_allowed": {
+              "type": "boolean"
+            },
+            "tolerance": {
+              "type": "object",
+              "properties": {
+                "under": {
+                  "type": "string"
+                },
+                "over": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "payee_coords": {
+          "type": "object",
+          "properties": {
+            "method": {
+              "type": "string"
+            },
+            "evm": {
+              "type": "object",
+              "properties": {
+                "address": {
+                  "type": "string"
+                },
+                "chain": {
+                  "type": "string"
+                },
+                "wallet_type": {
+                  "type": "string"
+                },
+                "proof": {
+                  "type": "object",
+                  "required": [
+                    "type"
+                  ],
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "challenge": {
+                      "type": "string"
+                    },
+                    "signature": {
+                      "type": "string"
+                    }
+                  },
+                  "description": "Proof of control, bound to {did, session id, timestamp or nonce}."
+                }
+              }
+            },
+            "bank": {
+              "type": "object"
+            }
+          }
+        },
+        "method_ref": {
+          "type": "string",
+          "description": "A stored, verified payment method instead of payee_coords."
+        },
+        "compliance": {
+          "type": "object",
+          "properties": {
+            "policy_uri": {
+              "type": "string"
+            },
+            "vc_requirements": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            },
+            "ivms101": {
+              "type": "object"
+            }
+          }
+        },
+        "integrity": {
+          "type": "object",
+          "required": [
+            "terms_sha256"
+          ],
+          "properties": {
+            "terms_sha256": {
+              "type": "string"
+            }
+          }
+        },
+        "mandate_id": {
+          "type": "string"
+        },
+        "cycle_id": {
+          "type": "string"
+        },
+        "quote_id": {
+          "type": "string"
+        },
+        "ext": {
+          "type": "object",
+          "description": "Namespaced extensions (reverse-DNS keys); unknown keys MUST be ignored."
+        }
+      },
+      "required": [
+        "session",
+        "terms",
+        "integrity"
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "payee_coords"
+          ]
+        },
+        {
+          "required": [
+            "method_ref"
+          ]
+        }
+      ]
+    }
+  }
+}

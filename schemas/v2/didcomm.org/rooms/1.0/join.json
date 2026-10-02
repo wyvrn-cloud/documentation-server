@@ -1,0 +1,254 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "rooms/1.0/join",
+  "description": "Joins a room with an MLS KeyPackage attachment; invite-only rooms also need a valid join token.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "attachments",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/rooms/1.0/join"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "room_did": {
+          "type": "string",
+          "pattern": "^did:[a-z0-9]+:[^#]+$",
+          "description": "The room's DID."
+        },
+        "token": {
+          "type": "object",
+          "description": "A join token: a signed, device-bound, replay-proof ticket, with the HPKE-sealed welcome secret.",
+          "required": [
+            "token",
+            "sig"
+          ],
+          "properties": {
+            "token": {
+              "type": "object",
+              "required": [
+                "typ",
+                "session_id"
+              ],
+              "properties": {
+                "typ": {
+                  "type": "string"
+                },
+                "session_id": {
+                  "type": "string"
+                },
+                "scope": {
+                  "type": "string"
+                },
+                "device": {
+                  "type": "string"
+                },
+                "ctr": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "exp": {
+                  "type": "string"
+                },
+                "cap": {
+                  "type": "integer"
+                }
+              }
+            },
+            "sig": {
+              "type": "object",
+              "required": [
+                "suite",
+                "kid",
+                "value"
+              ],
+              "properties": {
+                "suite": {
+                  "type": "string"
+                },
+                "kid": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                }
+              }
+            },
+            "envelope": {
+              "type": "object",
+              "properties": {
+                "suite": {
+                  "type": "string"
+                },
+                "aad": {
+                  "type": "object",
+                  "properties": {
+                    "ticket_digest": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "ciphertext": {
+                  "type": "string"
+                },
+                "enc": {
+                  "type": "object",
+                  "properties": {
+                    "kem": {
+                      "type": "string"
+                    },
+                    "kdf": {
+                      "type": "string"
+                    },
+                    "aead": {
+                      "type": "string"
+                    },
+                    "ek_pub": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "room_did"
+      ]
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/attachment"
+      },
+      "description": "The MLS KeyPackage (application/mls-keypackage).",
+      "minItems": 1
+    }
+  },
+  "$defs": {
+    "attachment": {
+      "type": "object",
+      "required": [
+        "data"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._~-]+$"
+        },
+        "description": {
+          "type": "string"
+        },
+        "filename": {
+          "type": "string"
+        },
+        "media_type": {
+          "type": "string"
+        },
+        "format": {
+          "type": "string"
+        },
+        "lastmod_time": {
+          "type": [
+            "integer",
+            "string"
+          ]
+        },
+        "byte_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "data": {
+          "type": "object",
+          "anyOf": [
+            {
+              "required": [
+                "jws"
+              ]
+            },
+            {
+              "required": [
+                "hash"
+              ]
+            },
+            {
+              "required": [
+                "links"
+              ]
+            },
+            {
+              "required": [
+                "base64"
+              ]
+            },
+            {
+              "required": [
+                "json"
+              ]
+            }
+          ],
+          "properties": {
+            "jws": {
+              "type": "object"
+            },
+            "hash": {
+              "type": "string"
+            },
+            "links": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "base64": {
+              "type": "string"
+            },
+            "json": {}
+          }
+        }
+      }
+    }
+  }
+}

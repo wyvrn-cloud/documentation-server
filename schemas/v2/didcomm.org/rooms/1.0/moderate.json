@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "rooms/1.0/moderate",
+  "description": "An admin action on membership, triggering an MLS Commit; MUST carry a Signing 1.0 authorization.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/rooms/1.0/moderate"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "room_did": {
+          "type": "string",
+          "pattern": "^did:[a-z0-9]+:[^#]+$",
+          "description": "The room's DID."
+        },
+        "action": {
+          "enum": [
+            "add",
+            "remove",
+            "ban",
+            "unban",
+            "promote",
+            "demote",
+            "transfer-ownership"
+          ]
+        },
+        "subject": {
+          "type": "string",
+          "pattern": "^did:[a-z0-9]+:[^#]+$"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "authz": {
+          "type": "object",
+          "description": "A Signing 1.0 authorization artifact, verifiable against the Room DID's controllers (or a delegation).",
+          "required": [
+            "type",
+            "signatures"
+          ],
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "session_id": {
+              "type": "string"
+            },
+            "signatures": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "room_did",
+        "action",
+        "subject",
+        "authz"
+      ]
+    }
+  }
+}

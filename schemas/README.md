@@ -103,6 +103,22 @@ Stalled and Retired Aries RFCs are documented but get no schemas.
 (`dda/1.0`, `dda-negotiation/1.0`) than its own. `data-agreement-context-decorator/1.0`
 defines a decorator, not messages.
 
+### Tier 2: Demonstrated
+
+| Protocol | Style | Messages |
+|---|---|---|
+| `group-chat/1.0` | v2 + v1 | `request`, `message` |
+| `survey/1.0` | v2 + v1 | `request`, `response` (JSONForms), `problem-report` |
+| `receipts/1.0` | v2 + v1 | `request-receipts`, `message-receipts` |
+| `user-profile/1.0` | v2 + v1 | `profile`, `request-profile` |
+| `media-sharing/1.0` | v2 + v1 | `share-media`, `request-media` |
+| `signing/1.0` | v2 | propose/request signing, consent, partial-signature, combine, provide-artifacts, issue-token, `ack`, decline, `problem-report` |
+| `payments/1.0` | v2 | query-methods, methods, compliance, handshake, receipt, confirm, cancel, method update/revoke, the mandates profile, `problem-report` |
+| `rooms/1.0` | v2 | create, invite, join, welcome, commit, leave, roster, msg, moderate, route advertise/ack, `problem-report` |
+| `workflow/1.0` | v2 | publish-template, start, advance, status, pause/resume/cancel/complete, discover, workflows, fetch-template, template, `problem-report` |
+| `n-wise/1.0` | v1 | `invitation`, `ledger-update-notify` |
+| `drpc/1.0` | v1 | `request`, `response` (JSON-RPC), `problem-report` |
+
 ## Validation notes (2026-10-01)
 
 - All schemas pass the JSON Schema 2020-12 meta-schema.
@@ -135,3 +151,10 @@ defines a decorator, not messages.
   - The data-agreement pages' `to` written as a string, not an array (7).
   - did-rotate's `ack` without the `status` RFC 0015 requires, and RFC 0035's sample
     with a placeholder string for `~thread`.
+
+## Validation notes, tier 2 (2026-10-02)
+
+174 upstream examples are now checked; tier 2 adds 11 mismatches, again all shortcuts
+in the examples: enum alternatives written as `"a|b|c"` (payments), examples without
+`id` or `~thread`, survey's response example reusing the request's type, and
+`expires_time` given as an ISO string where DIDComm v2 uses epoch seconds.

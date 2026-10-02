@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "survey/1.0/request",
+  "description": "Asks the responder to fill in a JSONForms survey.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "thid",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/survey/1.0/request"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "request": {
+          "type": "object",
+          "required": [
+            "survey_id",
+            "survey_schema",
+            "ui_schema"
+          ],
+          "properties": {
+            "survey_id": {
+              "type": "string"
+            },
+            "survey_schema": {
+              "type": "object",
+              "description": "JSONForms schema: questions, answers and validations."
+            },
+            "ui_schema": {
+              "type": "object",
+              "description": "JSONForms UI schema: layout, controls, help text."
+            },
+            "init_data": {
+              "type": "object",
+              "description": "Prefilled answers."
+            },
+            "i18n_data": {
+              "type": "object",
+              "description": "Translations."
+            }
+          }
+        }
+      },
+      "required": [
+        "request"
+      ]
+    }
+  }
+}

@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "payments/1.0/mandate-offer",
+  "description": "Mandates profile: the payee proposes a subscription plan and its constraints. mandate_terms_sha256 is the JCS SHA-256 of this body.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/payments/1.0/mandate-offer"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "plan": {
+          "type": "object"
+        },
+        "terms": {
+          "type": "object"
+        },
+        "constraints": {
+          "type": "object",
+          "properties": {
+            "cap_per_charge_quantity": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "cap_per_period_quantity": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "cap_total_quantity": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "expires_at": {
+              "type": "string"
+            }
+          }
+        },
+        "methods_allowed": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "code"
+            ],
+            "properties": {
+              "code": {
+                "type": "string",
+                "description": "e.g. method:evm, method:bank:iban."
+              },
+              "variants": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "variant": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "autopay_requested": {
+          "type": "boolean"
+        },
+        "notify_days_before": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "compliance_requirements": {
+          "type": "object"
+        },
+        "mandate_terms_sha256": {
+          "type": "string"
+        },
+        "mandate_id": {
+          "type": "string"
+        },
+        "cycle_id": {
+          "type": "string"
+        },
+        "quote_id": {
+          "type": "string"
+        },
+        "ext": {
+          "type": "object",
+          "description": "Namespaced extensions (reverse-DNS keys); unknown keys MUST be ignored."
+        }
+      },
+      "required": [
+        "plan",
+        "terms",
+        "mandate_terms_sha256"
+      ]
+    }
+  }
+}

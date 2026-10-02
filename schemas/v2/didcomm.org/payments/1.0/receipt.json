@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "payments/1.0/receipt",
+  "description": "The payer reports payment: one proof per transaction, with summary_hash equal to terms_sha256. Unique per {session_id, tx_ref}.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "thid",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/payments/1.0/receipt"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "session_id": {
+          "type": "string",
+          "description": "The payment session's id."
+        },
+        "request_id": {
+          "type": "string"
+        },
+        "proofs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "tx_ref",
+              "summary_hash"
+            ],
+            "properties": {
+              "network": {
+                "type": "object",
+                "properties": {
+                  "chain": {
+                    "type": "string",
+                    "description": "CAIP-2 chain id."
+                  },
+                  "confirmations_required": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              },
+              "tx_ref": {
+                "type": "string"
+              },
+              "summary_hash": {
+                "type": "string"
+              },
+              "payer_hint": {
+                "type": "object"
+              },
+              "payer_proof": {
+                "type": "object",
+                "required": [
+                  "type"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string"
+                  },
+                  "challenge": {
+                    "type": "string"
+                  },
+                  "signature": {
+                    "type": "string"
+                  }
+                },
+                "description": "Proof of control, bound to {did, session id, timestamp or nonce}."
+              }
+            }
+          }
+        },
+        "mandate_id": {
+          "type": "string"
+        },
+        "cycle_id": {
+          "type": "string"
+        },
+        "quote_id": {
+          "type": "string"
+        },
+        "ext": {
+          "type": "object",
+          "description": "Namespaced extensions (reverse-DNS keys); unknown keys MUST be ignored."
+        }
+      },
+      "required": [
+        "session_id",
+        "proofs"
+      ]
+    }
+  }
+}

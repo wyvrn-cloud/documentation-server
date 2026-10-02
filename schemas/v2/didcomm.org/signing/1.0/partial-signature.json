@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "signing/1.0/partial-signature",
+  "description": "A signature, or a round of a multi-round scheme (MuSig2, FROST): signature for single-round, round and data otherwise. Threads with thid.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "thid",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/signing/1.0/partial-signature"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "session_id": {
+          "type": "string",
+          "description": "The signing session's id."
+        },
+        "object_id": {
+          "type": "string"
+        },
+        "signer": {
+          "type": "string"
+        },
+        "suite": {
+          "type": "string"
+        },
+        "signature": {
+          "type": "object",
+          "required": [
+            "format",
+            "value"
+          ],
+          "properties": {
+            "format": {
+              "type": "string"
+            },
+            "value": {
+              "type": "string"
+            },
+            "public_key_hint": {
+              "type": "string"
+            }
+          }
+        },
+        "round": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "data": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "session_id",
+        "object_id",
+        "signer"
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "signature"
+          ]
+        },
+        {
+          "required": [
+            "round",
+            "data"
+          ]
+        }
+      ]
+    }
+  }
+}

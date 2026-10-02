@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "signing/1.0/consent",
+  "description": "The signer's approval and a proof binding its key, before it signs. Threads with thid.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "thid",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/signing/1.0/consent"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "session_id": {
+          "type": "string",
+          "description": "The signing session's id."
+        },
+        "object_id": {
+          "type": "string"
+        },
+        "key_binding_proof": {
+          "type": "object",
+          "required": [
+            "type",
+            "kid",
+            "signature"
+          ],
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "kid": {
+              "type": "string"
+            },
+            "payload": {
+              "type": "string"
+            },
+            "signature": {
+              "type": "string"
+            }
+          },
+          "description": "Verifiable with the suite's key_binding.controller."
+        }
+      },
+      "required": [
+        "session_id",
+        "object_id",
+        "key_binding_proof"
+      ]
+    }
+  }
+}

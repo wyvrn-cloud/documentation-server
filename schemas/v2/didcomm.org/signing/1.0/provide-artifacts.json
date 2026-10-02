@@ -1,0 +1,284 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "signing/1.0/provide-artifacts",
+  "description": "Delivers the signed artifacts, or sealed secrets with an authorization token (required for sealed-secret@1). Threads with thid.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "thid",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/signing/1.0/provide-artifacts"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "session_id": {
+          "type": "string",
+          "description": "The signing session's id."
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "e.g. pades-b-lta, or sealed-secret@1 for an encrypted secret (which needs token)."
+              },
+              "digest": {
+                "type": "string"
+              },
+              "links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "suite": {
+                "type": "string"
+              },
+              "aad": {
+                "type": "object",
+                "properties": {
+                  "ticket_digest": {
+                    "type": "string"
+                  }
+                }
+              },
+              "ciphertext": {
+                "type": "string"
+              },
+              "enc": {
+                "type": "object",
+                "properties": {
+                  "kem": {
+                    "type": "string"
+                  },
+                  "kdf": {
+                    "type": "string"
+                  },
+                  "aead": {
+                    "type": "string"
+                  },
+                  "ek_pub": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "token": {
+          "type": "object",
+          "description": "An authorization token: a server-signed, device-bound, replay-proof ticket.",
+          "required": [
+            "token",
+            "sig"
+          ],
+          "properties": {
+            "token": {
+              "type": "object",
+              "required": [
+                "typ",
+                "session_id"
+              ],
+              "properties": {
+                "typ": {
+                  "type": "string"
+                },
+                "session_id": {
+                  "type": "string"
+                },
+                "scope": {
+                  "type": "string"
+                },
+                "device": {
+                  "type": "string"
+                },
+                "ctr": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "exp": {
+                  "type": "string"
+                },
+                "aud": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "policy_hash": {
+                  "type": "string"
+                },
+                "nonce": {
+                  "type": "string"
+                },
+                "cap": {
+                  "type": "integer"
+                }
+              }
+            },
+            "sig": {
+              "type": "object",
+              "required": [
+                "suite",
+                "kid",
+                "value"
+              ],
+              "properties": {
+                "suite": {
+                  "type": "string"
+                },
+                "kid": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "session_id",
+        "artifacts"
+      ]
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/attachment"
+      },
+      "description": "Artifacts attached directly instead of by links."
+    }
+  },
+  "$defs": {
+    "attachment": {
+      "type": "object",
+      "required": [
+        "data"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._~-]+$"
+        },
+        "description": {
+          "type": "string"
+        },
+        "filename": {
+          "type": "string"
+        },
+        "media_type": {
+          "type": "string"
+        },
+        "format": {
+          "type": "string"
+        },
+        "lastmod_time": {
+          "type": [
+            "integer",
+            "string"
+          ]
+        },
+        "byte_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "data": {
+          "type": "object",
+          "anyOf": [
+            {
+              "required": [
+                "jws"
+              ]
+            },
+            {
+              "required": [
+                "hash"
+              ]
+            },
+            {
+              "required": [
+                "links"
+              ]
+            },
+            {
+              "required": [
+                "base64"
+              ]
+            },
+            {
+              "required": [
+                "json"
+              ]
+            }
+          ],
+          "properties": {
+            "jws": {
+              "type": "object"
+            },
+            "hash": {
+              "type": "string"
+            },
+            "links": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "base64": {
+              "type": "string"
+            },
+            "json": {}
+          }
+        }
+      }
+    }
+  }
+}

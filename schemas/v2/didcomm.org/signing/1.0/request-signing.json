@@ -1,0 +1,336 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "signing/1.0/request-signing",
+  "description": "Asks a signer to sign an object with a suite and constraints. session, object and suite are required; idempotency_key SHOULD be unique per request. Full payloads MAY be attached.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/signing/1.0/request-signing"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "session": {
+          "type": "object",
+          "required": [
+            "session_id",
+            "mode"
+          ],
+          "properties": {
+            "session_id": {
+              "type": "string",
+              "description": "Unique and high-entropy."
+            },
+            "mode": {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "enum": [
+                    "single",
+                    "threshold"
+                  ]
+                }
+              }
+            },
+            "threshold": {
+              "type": "object",
+              "properties": {
+                "scheme": {
+                  "enum": [
+                    "n-of-m",
+                    "cryptographic",
+                    "contract"
+                  ]
+                },
+                "n": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "m": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "signers": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "aggregation": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "object": {
+          "type": "object",
+          "description": "What is being signed (a SignableObject).",
+          "required": [
+            "id",
+            "media_type",
+            "canonicalization",
+            "digest"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "media_type": {
+              "type": "string"
+            },
+            "canonicalization": {
+              "type": "object",
+              "required": [
+                "method"
+              ],
+              "properties": {
+                "method": {
+                  "type": "string"
+                },
+                "parameters": {
+                  "type": "object"
+                }
+              }
+            },
+            "digest": {
+              "type": "object",
+              "required": [
+                "alg",
+                "value"
+              ],
+              "properties": {
+                "alg": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                }
+              },
+              "description": "Over the canonical bytes."
+            },
+            "display_hints": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "preview_links": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "summary": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "suite": {
+          "type": "object",
+          "required": [
+            "suite",
+            "key_binding"
+          ],
+          "properties": {
+            "suite": {
+              "type": "string",
+              "description": "A signature suite id, e.g. pades-b-lta@1, evm-eip712@1, psbt@2."
+            },
+            "key_binding": {
+              "type": "object",
+              "required": [
+                "controller"
+              ],
+              "properties": {
+                "controller": {
+                  "type": "string"
+                },
+                "proof_purpose": {
+                  "type": "string"
+                }
+              }
+            },
+            "constraints": {
+              "type": "object",
+              "properties": {
+                "not_before": {
+                  "type": "string"
+                },
+                "expires_time": {
+                  "type": "string"
+                },
+                "intended_audience": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "use_limit": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "policy_uri": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "idempotency_key": {
+          "type": "string"
+        },
+        "ui": {
+          "type": "object",
+          "properties": {
+            "must_display_summary": {
+              "type": "boolean"
+            }
+          }
+        }
+      },
+      "required": [
+        "session",
+        "object",
+        "suite"
+      ]
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/attachment"
+      },
+      "description": "The full payload (EIP-712 typed data, PSBT, PDF bytes, ...), inline or by links with hash."
+    }
+  },
+  "$defs": {
+    "attachment": {
+      "type": "object",
+      "required": [
+        "data"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._~-]+$"
+        },
+        "description": {
+          "type": "string"
+        },
+        "filename": {
+          "type": "string"
+        },
+        "media_type": {
+          "type": "string"
+        },
+        "format": {
+          "type": "string"
+        },
+        "lastmod_time": {
+          "type": [
+            "integer",
+            "string"
+          ]
+        },
+        "byte_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "data": {
+          "type": "object",
+          "anyOf": [
+            {
+              "required": [
+                "jws"
+              ]
+            },
+            {
+              "required": [
+                "hash"
+              ]
+            },
+            {
+              "required": [
+                "links"
+              ]
+            },
+            {
+              "required": [
+                "base64"
+              ]
+            },
+            {
+              "required": [
+                "json"
+              ]
+            }
+          ],
+          "properties": {
+            "jws": {
+              "type": "object"
+            },
+            "hash": {
+              "type": "string"
+            },
+            "links": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "base64": {
+              "type": "string"
+            },
+            "json": {}
+          }
+        }
+      }
+    }
+  }
+}

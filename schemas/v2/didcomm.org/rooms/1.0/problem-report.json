@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "rooms/1.0/problem-report",
+  "description": "A problem report (DIDComm Messaging spec, Problem Reports), adopted into this protocol. pthid is the thid of the thread where the problem occurred. Codes include authz.denied, mls.conflict, mls.epoch-stale, join.token-expired, join.replay, router.attestation-invalid. MUST NOT leak MLS plaintext.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "pthid",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/rooms/1.0/problem-report"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "ack": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Ids of the message(s) that triggered the problem."
+    },
+    "body": {
+      "type": "object",
+      "required": [
+        "code"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[ew]\\.[a-z0-9-]+(\\.[a-z0-9-]+)*$",
+          "description": "Problem code: sorter (e = error, w = warning), scope (p = protocol, m = message, or a state name), then descriptors, dot-separated, lower kebab-case. E.g. e.p.xfer.cant-use-endpoint."
+        },
+        "comment": {
+          "type": "string",
+          "description": "Human-friendly text statically associated with code; {1}, {2}, ... interpolate args."
+        },
+        "args": {
+          "type": "array",
+          "description": "Situation-specific values interpolated into comment."
+        },
+        "escalate_to": {
+          "type": "string",
+          "format": "uri",
+          "description": "Where to get further help."
+        }
+      }
+    }
+  }
+}

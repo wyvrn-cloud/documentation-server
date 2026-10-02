@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "workflow/1.0/start",
+  "description": "Starts a workflow instance from a template, bound to the connection it arrives on (connection_id MUST NOT be sent). Context values can be vault references ({\"$ref\": {vault_id, doc_id, digest}}).",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/workflow/1.0/start"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "template_id": {
+          "type": "string"
+        },
+        "template_version": {
+          "type": "string"
+        },
+        "instance_id": {
+          "type": "string",
+          "description": "The workflow instance's id (thid SHOULD equal it)."
+        },
+        "participants": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "did": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "context": {
+          "type": "object"
+        },
+        "vault_ref": {
+          "type": "object",
+          "required": [
+            "vault_id"
+          ],
+          "properties": {
+            "vault_id": {
+              "type": "string"
+            },
+            "base_url": {
+              "type": "string"
+            }
+          }
+        },
+        "allow_discover": {
+          "type": "boolean",
+          "default": true
+        },
+        "template_hash": {
+          "type": "string"
+        },
+        "multiplicity_hint": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "template_id"
+      ]
+    }
+  }
+}

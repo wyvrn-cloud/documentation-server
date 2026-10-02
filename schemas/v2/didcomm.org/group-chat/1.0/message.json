@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "group-chat/1.0/message",
+  "description": "Group chat messages: broadcast by the controller, or sent to it by a participant to forward.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "thid",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/group-chat/1.0/message"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "ConversationId": {
+          "type": "string"
+        },
+        "Messages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "Id",
+              "Content",
+              "SenderAlias",
+              "SentDateTime",
+              "MessageForward"
+            ],
+            "properties": {
+              "Id": {
+                "type": "string"
+              },
+              "Content": {
+                "type": "string"
+              },
+              "SenderAlias": {
+                "type": "string"
+              },
+              "SentDateTime": {
+                "type": "string",
+                "description": "ISO 8601 timestamp."
+              },
+              "MessageForward": {
+                "type": "boolean",
+                "description": "True when the controller forwards a participant's message."
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "ConversationId",
+        "Messages"
+      ]
+    }
+  }
+}
