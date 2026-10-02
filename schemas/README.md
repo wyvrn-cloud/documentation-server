@@ -8,12 +8,20 @@ That is currently every protocol on didcomm.org. The server merges these into
 
 ```
 schemas/
-  <PIURI host>/<protocol name>/<version>/<message-name>.json
+  v2/<PIURI host>/<protocol name>/<version>/<message-name>.json   DIDComm v2 messages
+  v1/<PIURI host>/<protocol name>/<version>/<message-name>.json   DIDComm v1 messages
 ```
+
+A message type used with both DIDComm v1 and v2 (several didcomm.org protocols show
+examples of both) has a schema under each. The server tells them apart by what they
+pin: `properties.type.const` is a v2 schema, `properties.@type` a v1 schema. It warns
+when a file sits under the wrong folder. Responses list both under the message type's
+`schemas`, each with its `didcomm_versions` (`^1.0` or `^2.0`).
 
 The path comes from the **PIURI**, never from the upstream folder name. For example,
 the didcomm.org folder `messagepickup/4.0` holds `https://didcomm.org/message-pickup/4.0`,
-so a schema for it would live under `didcomm.org/message-pickup/4.0/`.
+so a v2 schema for it lives under `v2/didcomm.org/message-pickup/4.0/`. A protocol known
+by an alias (see `mappings/piuri-paths.toml`) is filed under the PIURI it's indexed by.
 
 Protocols that ship their own schemas next to their `readme.md` (the
 [`wyvrn-cloud/protocols`](https://github.com/wyvrn-cloud/protocols#schemas) convention)
@@ -25,8 +33,8 @@ Same as the `protocols` repo's:
 
 - [JSON Schema 2020-12](https://json-schema.org/draft/2020-12), self-contained (no
   cross-file `$ref`).
-- Each file validates a complete DIDComm v2 plaintext message: headers and `body`, with
-  `type` pinned by `const`.
+- Each `v2/` file validates a complete DIDComm v2 plaintext message: headers and `body`,
+  with `type` pinned by `const`.
 - `id` and `type` are always required.
 - Replies require `thid`, because the spec says a message continuing a thread MUST
   carry it.

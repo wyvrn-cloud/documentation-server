@@ -7,3 +7,10 @@
 [piuri]
 "https://didcomm.org/message-pickup/4.0" = "messagepickup/4.0"
 "https://didcomm.org/questionanswer/1.0" = "question-answer/1.0"
+
+# Other PIURIs a protocol is known by, as "<alias>" = "<PIURI it's indexed under>".
+# Requests naming an alias (or a message type under one) get the indexed protocol, and
+# examples and schemas using one are filed under it. The legacy DIDComm v1 prefix
+# did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/ needs no entry: it's always read as
+# https://didcomm.org/.
+[aliases]
