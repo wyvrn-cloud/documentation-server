@@ -24,6 +24,9 @@ It serves:
   Stalled and Retired ones included. RFCs have no frontmatter, so
   [`mappings/aries-rfcs.toml`](mappings/aries-rfcs.toml) says which RFC is which
   PIURI. An RFC replaces a didcomm.org page for the same PIURI that only links to it.
+- **issue-credential/3.0 and present-proof/3.0** (DIDComm v2) from
+  [WACI-DIDComm](https://github.com/decentralized-identity/waci-didcomm), via
+  [`mappings/waci-didcomm.toml`](mappings/waci-didcomm.toml).
 - **Documents**: a table of contents, plus any single section, of:
   - `spec`: the DIDComm Messaging spec v2.0, v2.1 and the editor's draft, and `1.0`:
     DIDComm v1, compiled from the Aries RFCs that define it (threading, decorators,
@@ -32,6 +35,10 @@ It serves:
   - `aries/attachment-formats`: the credential attachment formats issue-credential and
     present-proof 2.0 carry (Indy, AnonCreds, JSON-LD, Data Integrity, SD-JWT, DIF
     Presentation Exchange, ...)
+  - `extension/<name>`: the DIDComm v2 extensions in the spec repository
+    (`extension/l10n`, `extension/return_route`, `extension/advanced_sequencing`, and
+    the email, filesystem and libp2p transports), version `current`
+  - `waci-didcomm`: the WACI-DIDComm Interop Profile v1.0
 
   The table of contents lists every document served.
 - **Hand-written JSON Schemas** for the core protocols. didcomm.org has none, so they

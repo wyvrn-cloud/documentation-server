@@ -48,8 +48,15 @@ path = "sources/didcomm-messaging"
 
 [[source]]
 name = "aries-rfcs"
-kind = "aries-rfcs"
+kind = "rfcs"
 path = "sources/aries-rfcs"
 manifest = "mappings/aries-rfcs.toml"
 # Every protocol here is a DIDComm v1 one.
 didcomm_versions = ["^1.0"]
+
+[[source]]
+name = "waci-didcomm"
+kind = "rfcs"
+path = "sources/waci-didcomm"
+manifest = "mappings/waci-didcomm.toml"
+didcomm_versions = ["^2.0"]

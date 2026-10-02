@@ -1,10 +1,12 @@
-//! Reading [hyperledger/aries-rfcs](https://github.com/hyperledger/aries-rfcs), where
-//! most DIDComm v1 protocols are defined.
+//! Reading RFC-style Markdown: [hyperledger/aries-rfcs](https://github.com/hyperledger/aries-rfcs),
+//! where most DIDComm v1 protocols are defined, and
+//! [decentralized-identity/waci-didcomm](https://github.com/decentralized-identity/waci-didcomm).
 //!
 //! RFCs have no frontmatter: a header list under the title gives the status, authors
-//! and tags, and the PIURI only appears in prose. So `mappings/aries-rfcs.toml` says
-//! which RFC is which protocol, and which RFCs make up documents (DIDComm v1 itself, as
-//! `spec` version `1.0`; the credential attachment formats).
+//! and tags, and the PIURI only appears in prose. So a manifest
+//! (`mappings/aries-rfcs.toml`) says which RFC is which protocol, and which RFCs make up
+//! documents (DIDComm v1 itself, as `spec` version `1.0`; the credential attachment
+//! formats). An RFC is a folder holding a `README.md`, or a single Markdown file.
 
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::path::Path;
@@ -63,13 +65,13 @@ pub struct RfcHeader {
 }
 
 impl Index {
-    pub(crate) fn index_aries(
+    pub(crate) fn index_rfcs(
         &mut self,
         source: &SourceConfig,
         revisions: &HashMap<String, String>,
     ) {
         let Some(manifest_path) = &source.manifest else {
-            self.warnings.push(format!("source {}: an aries-rfcs source needs a manifest", source.name));
+            self.warnings.push(format!("source {}: an rfcs source needs a manifest", source.name));
             return;
         };
         let manifest: Manifest = match index::read_toml(manifest_path) {
@@ -87,8 +89,7 @@ impl Index {
         }
 
         for entry in &manifest.protocol {
-            let dir = source.path.join(&entry.rfc);
-            let readme = dir.join("README.md");
+            let (dir, readme) = rfc_paths(&source.path, &entry.rfc);
             let text = match std::fs::read_to_string(&readme) {
                 Ok(t) => t,
                 Err(e) => {
@@ -129,7 +130,7 @@ impl Index {
         for document in &manifest.document {
             let mut sections = Vec::new();
             for rfc in &document.rfcs {
-                let readme = source.path.join(rfc).join("README.md");
+                let (_, readme) = rfc_paths(&source.path, rfc);
                 match std::fs::read_to_string(&readme) {
                     Ok(text) => sections.extend(rfc_sections(rfc, &text)),
                     Err(e) => self.warnings.push(format!("{}: {e}", readme.display())),
@@ -163,8 +164,8 @@ impl Index {
             .chain(manifest.ignore.rfcs.iter().map(String::as_str))
             .collect();
         for rfc in &named {
-            if !source.path.join(rfc).join("README.md").is_file() {
-                self.warnings.push(format!("aries-rfcs manifest: {rfc} doesn't exist in {}", source.name));
+            if !rfc_paths(&source.path, rfc).1.is_file() {
+                self.warnings.push(format!("{} manifest: {rfc} doesn't exist", source.name));
             }
         }
         for group in ["features", "concepts"] {
@@ -186,6 +187,17 @@ impl Index {
                 }
             }
         }
+    }
+}
+
+/// An RFC's folder and its Markdown: `<rfc>/README.md`, or `<rfc>` itself when it names
+/// a `.md` file (whose folder is then its parent).
+fn rfc_paths(base: &Path, rfc: &str) -> (std::path::PathBuf, std::path::PathBuf) {
+    let path = base.join(rfc);
+    if rfc.ends_with(".md") {
+        (path.parent().unwrap_or(base).to_path_buf(), path)
+    } else {
+        (path.clone(), path.join("README.md"))
     }
 }
 
@@ -245,9 +257,13 @@ pub fn parse_rfc(
 
 /// An RFC's sections for a compiled document: every id prefixed with the RFC number
 /// (`rfc0008-...`), and the title's section, which holds the whole RFC, as `rfc0008`.
+/// Unnumbered documents keep their ids.
 pub fn rfc_sections(rfc: &str, text: &str) -> Vec<Section> {
     let folder = rfc.rsplit('/').next().unwrap_or(rfc);
     let number: String = folder.chars().take_while(char::is_ascii_digit).collect();
+    if number.is_empty() {
+        return markdown::sections(text); // not a numbered RFC: ids as they are
+    }
     let prefix = format!("rfc{number}");
     let mut title_seen = false;
     markdown::sections(text)

@@ -56,8 +56,8 @@ COPY --from=builder /build/target/release/documentation-server /usr/local/bin/do
 COPY config config
 COPY mappings mappings
 COPY schemas schemas
-# Only what the index reads: protocol definitions, and the spec's Markdown (not its
-# ~90 MB of images or the rendered HTML).
+# Only what the index reads: protocol definitions, and the spec's and its extensions'
+# Markdown (not its ~90 MB of images or the rendered HTML).
 # The image has no .git, so the sources' commits come from this file (index.revisions).
 COPY sources/revisions.toml sources/revisions.toml
 COPY sources/didcomm.org/site/content/protocols sources/didcomm.org/site/content/protocols
@@ -65,7 +65,11 @@ COPY sources/didcomm-messaging/specs.json sources/didcomm-messaging/specs.json
 COPY sources/didcomm-messaging/docs/spec-files sources/didcomm-messaging/docs/spec-files
 COPY sources/didcomm-messaging/docs/spec-files-v2.0-snapshot sources/didcomm-messaging/docs/spec-files-v2.0-snapshot
 COPY sources/didcomm-messaging/docs/spec-files-v2.1-snapshot sources/didcomm-messaging/docs/spec-files-v2.1-snapshot
+COPY sources/didcomm-messaging/extensions sources/didcomm-messaging/extensions
 COPY --from=aries-rfcs /aries-rfcs sources/aries-rfcs
+COPY sources/waci-didcomm/issue_credential/README.md sources/waci-didcomm/issue_credential/README.md
+COPY sources/waci-didcomm/present_proof sources/waci-didcomm/present_proof
+COPY sources/waci-didcomm/spec/v1.0 sources/waci-didcomm/spec/v1.0
 # The identity lives in a volume so the server keeps its DID across container restarts.
 RUN mkdir -p data && chown docserver data
 VOLUME /app/data

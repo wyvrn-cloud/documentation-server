@@ -28,11 +28,13 @@ fn indexes_everything_without_warnings() {
     assert!(readmes >= 50, "expected the full didcomm.org registry, found {readmes} definitions");
     let from_didcomm_org = index.protocols.values().filter(|d| d.source.name == "didcomm.org").count();
     let from_aries = index.protocols.values().filter(|d| d.source.name == "aries-rfcs").count();
-    // Every didcomm.org page is indexed, except stubs an Aries RFC replaced.
+    let from_waci = index.protocols.values().filter(|d| d.source.name == "waci-didcomm").count();
+    // Every didcomm.org page is indexed, except stubs an RFC replaced.
     let replaced = readmes - from_didcomm_org;
     assert!((10..=20).contains(&replaced), "{replaced} didcomm.org stubs replaced");
     assert!(from_aries >= 40, "{from_aries} protocols from the Aries RFCs");
-    assert_eq!(index.protocols.len(), from_didcomm_org + from_aries);
+    assert_eq!(from_waci, 2);
+    assert_eq!(index.protocols.len(), from_didcomm_org + from_aries + from_waci);
 }
 
 #[test]
@@ -166,6 +168,7 @@ fn the_revisions_file_matches_the_submodules() {
         ("didcomm.org", "sources/didcomm.org"),
         ("didcomm-messaging", "sources/didcomm-messaging"),
         ("aries-rfcs", "sources/aries-rfcs"),
+        ("waci-didcomm", "sources/waci-didcomm"),
     ] {
         let output = std::process::Command::new("git").args(["ls-tree", "HEAD", path]).output().unwrap();
         let listing = String::from_utf8(output.stdout).unwrap();
@@ -176,4 +179,45 @@ fn the_revisions_file_matches_the_submodules() {
             "sources/revisions.toml is stale for {name}; run scripts/update-sources.sh"
         );
     }
+}
+
+#[test]
+fn the_spec_extensions_are_documents() {
+    let index = index();
+    let ids: Vec<_> = index.documents.keys().map(String::as_str).collect();
+    for id in [
+        "extension/advanced_sequencing",
+        "extension/email_transport",
+        "extension/filesystem_transport",
+        "extension/l10n",
+        "extension/libp2p_transport",
+        "extension/return_route",
+    ] {
+        assert!(ids.contains(&id), "{id} missing from {ids:?}");
+    }
+    let l10n = &index.documents["extension/l10n"];
+    assert_eq!(l10n.title, "DIDComm L10n Extension");
+    assert_eq!(l10n.didcomm_versions, ["^2.0"]);
+    let current = &l10n.versions["current"];
+    assert!(current.sections.iter().any(|s| s.id == "scope" && s.markdown.contains("accept-lang")));
+    assert_eq!(current.source.path, "extensions/l10n/main.md");
+}
+
+#[test]
+fn waci_defines_the_v2_credential_protocols() {
+    let index = index();
+    for (piuri, messages) in [
+        ("https://didcomm.org/issue-credential/3.0", ["propose-credential", "offer-credential", "request-credential", "issue-credential"]),
+        ("https://didcomm.org/present-proof/3.0", ["propose-presentation", "request-presentation", "presentation", "presentation"]),
+    ] {
+        let doc = &index.protocols[piuri];
+        assert_eq!(doc.source.name, "waci-didcomm", "{piuri} replaces didcomm.org's stub");
+        assert_eq!(doc.didcomm_versions(), ["^2.0"]);
+        assert_eq!(doc.status, "Proposed");
+        for name in messages {
+            assert!(doc.message(&format!("{piuri}/{name}")).is_some(), "{piuri}/{name}");
+        }
+    }
+    let profile = &index.documents["waci-didcomm"];
+    assert!(profile.versions["1.0"].sections.iter().any(|s| s.title == "Interoperability Profile"));
 }
