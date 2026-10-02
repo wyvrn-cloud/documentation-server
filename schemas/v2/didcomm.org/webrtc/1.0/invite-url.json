@@ -1,0 +1,184 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "webrtc/1.0/invite-url",
+  "description": "A join-link payload (didcomm://?_oob=... or https://...#oob=...), never sent on the wire: how to reach the inviter, the call's capabilities and an ephemeral prekey, signed. Authcrypt. Not a sent message, so it has no id.",
+  "type": "object",
+  "required": [
+    "type",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/webrtc/1.0/invite-url"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "topology": {
+          "enum": [
+            "mesh",
+            "sfu"
+          ]
+        },
+        "display": {
+          "type": "string"
+        },
+        "thid": {
+          "type": "string"
+        },
+        "exp": {
+          "type": "integer"
+        },
+        "one_time": {
+          "type": "boolean"
+        },
+        "cap": {
+          "type": "object",
+          "properties": {
+            "media": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "audio",
+                  "video",
+                  "screen"
+                ]
+              }
+            },
+            "data": {
+              "type": "boolean"
+            }
+          }
+        },
+        "policy": {
+          "type": "string"
+        },
+        "service": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "endpoint"
+            ],
+            "properties": {
+              "transport": {
+                "type": "string"
+              },
+              "endpoint": {
+                "type": "string"
+              },
+              "return_route": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "ice_servers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "urls"
+            ],
+            "properties": {
+              "urls": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "username": {
+                "type": "string"
+              },
+              "credential": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "sfu": {
+          "type": "object",
+          "properties": {
+            "endpoint": {
+              "type": "string"
+            },
+            "room_id": {
+              "type": "string"
+            },
+            "features": {
+              "type": "object"
+            }
+          }
+        },
+        "prekey": {
+          "type": "object",
+          "description": "An ephemeral X25519 JWK."
+        },
+        "constraints": {
+          "type": "object"
+        },
+        "proof": {
+          "type": "object",
+          "required": [
+            "kid",
+            "jws"
+          ],
+          "properties": {
+            "alg": {
+              "type": "string"
+            },
+            "kid": {
+              "type": "string"
+            },
+            "jws": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "required": [
+        "topology",
+        "thid",
+        "exp",
+        "service",
+        "proof"
+      ]
+    }
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "swarm/1.0/store-receipt",
+  "description": "The pledger commits to keeping the shards, signed (jws) with its DID key; sequence is monotonic per requester and blob. Authcrypt.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "thid",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/swarm/1.0/store-receipt"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "receipt_id": {
+          "type": "string"
+        },
+        "blob_id": {
+          "type": "string",
+          "description": "The blob's id (also the thid of its messages)."
+        },
+        "shard_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "shard_digests": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "expiry": {
+          "type": "string"
+        },
+        "audit_endpoint": {
+          "type": "string"
+        },
+        "payment_ref": {
+          "type": "object",
+          "properties": {
+            "session_id": {
+              "type": "string"
+            },
+            "tx_ref": {
+              "type": "string"
+            }
+          }
+        },
+        "jws": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "receipt_id",
+        "blob_id",
+        "shard_ids",
+        "shard_digests",
+        "sequence",
+        "jws"
+      ]
+    }
+  }
+}

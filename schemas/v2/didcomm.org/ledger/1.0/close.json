@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ledger/1.0/close",
+  "description": "Proposes closing the ledger; with non-zero balances every other participant must ack it.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "thid",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/ledger/1.0/close"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "ledger_id": {
+          "type": "string",
+          "description": "The ledger's id."
+        },
+        "reason": {
+          "type": "string"
+        },
+        "final_balance": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^-?[0-9]+$",
+            "description": "Atomic units."
+          },
+          "description": "Net balance per participant DID."
+        }
+      },
+      "required": [
+        "ledger_id",
+        "reason",
+        "final_balance"
+      ]
+    }
+  }
+}

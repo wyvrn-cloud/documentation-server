@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "calendar/1.0/availability",
+  "description": "Free/busy slots in the queried range; privacy_level says how much is shown (free_busy_only by default).",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "thid",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/calendar/1.0/availability"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "timezone": {
+          "type": "string"
+        },
+        "slots": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "start",
+              "end",
+              "status"
+            ],
+            "properties": {
+              "start": {
+                "type": "string",
+                "description": "ISO 8601, UTC."
+              },
+              "end": {
+                "type": "string",
+                "description": "ISO 8601, UTC."
+              },
+              "status": {
+                "enum": [
+                  "free",
+                  "busy",
+                  "tentative",
+                  "out_of_office"
+                ]
+              }
+            }
+          }
+        },
+        "expires": {
+          "type": "string",
+          "description": "ISO 8601, UTC."
+        },
+        "privacy_level": {
+          "enum": [
+            "free_busy_only",
+            "titles_visible",
+            "full_details"
+          ]
+        }
+      },
+      "required": [
+        "slots"
+      ]
+    }
+  }
+}

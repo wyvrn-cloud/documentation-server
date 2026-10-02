@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "mesh/1.0/relay",
+  "description": "Wraps a packed DIDComm message (or a compact envelope between paired peers) for multi-hop delivery; deduplicated by id + timestamp. On constrained transports (BLE, LoRa) the binary encoding replaces this JSON form.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/mesh/1.0/relay"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Packet id, for deduplication."
+        },
+        "sender_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "description": "An 8-byte routing ID (SHA-256(signing_key)[0..8]), base64url."
+        },
+        "dest_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "description": "An 8-byte routing ID (SHA-256(signing_key)[0..8]), base64url."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "null for broadcasts."
+        },
+        "next_hop": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "description": "An 8-byte routing ID (SHA-256(signing_key)[0..8]), base64url."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ttl": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Decremented on every hop."
+        },
+        "timestamp": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Milliseconds since the epoch."
+        },
+        "flags": {
+          "type": "object",
+          "properties": {
+            "is_handshake": {
+              "type": "boolean"
+            },
+            "is_directed": {
+              "type": "boolean"
+            },
+            "is_fragment": {
+              "type": "boolean"
+            },
+            "requires_ack": {
+              "type": "boolean"
+            }
+          }
+        },
+        "payload": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "sender_id",
+        "ttl",
+        "timestamp",
+        "flags",
+        "payload"
+      ]
+    }
+  }
+}

@@ -1,0 +1,216 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "poe/1.0/submit-poe",
+  "description": "Delivers the ZK proof: public must match the program's public schema, and zk.vk_hash must be in the requester's registry for the circuit.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "thid",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/poe/1.0/submit-poe"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "program_id": {
+          "type": "string"
+        },
+        "result": {
+          "enum": [
+            "pass",
+            "fail"
+          ]
+        },
+        "public": {
+          "type": "object",
+          "required": [
+            "schema"
+          ],
+          "properties": {
+            "schema": {
+              "type": "string"
+            },
+            "nonce": {
+              "type": "string"
+            },
+            "context_hash": {
+              "type": "string"
+            },
+            "session_id": {
+              "type": "string"
+            },
+            "outputs_hash": {
+              "type": "string"
+            },
+            "vk_hash": {
+              "type": "string"
+            }
+          }
+        },
+        "zk": {
+          "type": "object",
+          "required": [
+            "scheme",
+            "circuit_id",
+            "vk_hash",
+            "proof_b64"
+          ],
+          "properties": {
+            "scheme": {
+              "type": "string"
+            },
+            "circuit_id": {
+              "type": "string"
+            },
+            "vk_hash": {
+              "type": "string"
+            },
+            "proof_b64": {
+              "type": "string"
+            }
+          }
+        },
+        "summary": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "program_id",
+        "result",
+        "public",
+        "zk"
+      ]
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/attachment"
+      },
+      "description": "Encrypted evidence, by reference."
+    }
+  },
+  "$defs": {
+    "attachment": {
+      "type": "object",
+      "required": [
+        "data"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._~-]+$"
+        },
+        "description": {
+          "type": "string"
+        },
+        "filename": {
+          "type": "string"
+        },
+        "media_type": {
+          "type": "string"
+        },
+        "format": {
+          "type": "string"
+        },
+        "lastmod_time": {
+          "type": [
+            "integer",
+            "string"
+          ]
+        },
+        "byte_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "data": {
+          "type": "object",
+          "anyOf": [
+            {
+              "required": [
+                "jws"
+              ]
+            },
+            {
+              "required": [
+                "hash"
+              ]
+            },
+            {
+              "required": [
+                "links"
+              ]
+            },
+            {
+              "required": [
+                "base64"
+              ]
+            },
+            {
+              "required": [
+                "json"
+              ]
+            }
+          ],
+          "properties": {
+            "jws": {
+              "type": "object"
+            },
+            "hash": {
+              "type": "string"
+            },
+            "links": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "base64": {
+              "type": "string"
+            },
+            "json": {}
+          }
+        }
+      }
+    }
+  }
+}

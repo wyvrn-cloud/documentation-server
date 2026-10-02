@@ -1,0 +1,183 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "pam/1.0/publish",
+  "description": "Delivers a PAM manifest with its PoE proof. MUST be authcrypted.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "thid",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/pam/1.0/publish"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "domain": {
+          "type": "string"
+        },
+        "pam_payload": {
+          "type": "object",
+          "description": "A Publisher Authentication Manifest: JWT-style claims, the pam body, and a PoE proof of legitimacy.",
+          "required": [
+            "iss",
+            "sub",
+            "pam",
+            "poe_proof"
+          ],
+          "properties": {
+            "iss": {
+              "type": "string"
+            },
+            "sub": {
+              "type": "string"
+            },
+            "jti": {
+              "type": "string"
+            },
+            "iat": {
+              "type": "integer"
+            },
+            "nbf": {
+              "type": "integer"
+            },
+            "exp": {
+              "type": "integer"
+            },
+            "pam": {
+              "type": "object",
+              "required": [
+                "version",
+                "publisher",
+                "artifacts"
+              ],
+              "properties": {
+                "version": {
+                  "type": "string"
+                },
+                "publisher": {
+                  "type": "object",
+                  "properties": {
+                    "did": {
+                      "type": "string"
+                    },
+                    "org": {
+                      "type": "string"
+                    },
+                    "contact": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "artifacts": {
+                  "type": "array"
+                },
+                "policies": {
+                  "type": "object"
+                },
+                "rotation": {
+                  "type": "object"
+                },
+                "revocations": {
+                  "type": "object"
+                },
+                "evidence": {
+                  "type": "object"
+                }
+              }
+            },
+            "poe_proof": {
+              "type": "object",
+              "required": [
+                "program_id",
+                "result",
+                "public",
+                "zk"
+              ],
+              "properties": {
+                "program_id": {
+                  "type": "string"
+                },
+                "result": {
+                  "enum": [
+                    "pass",
+                    "fail"
+                  ]
+                },
+                "public": {
+                  "type": "object"
+                },
+                "zk": {
+                  "type": "object",
+                  "properties": {
+                    "scheme": {
+                      "type": "string"
+                    },
+                    "circuit_id": {
+                      "type": "string"
+                    },
+                    "vk_hash": {
+                      "type": "string"
+                    },
+                    "proof_b64": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "attestation": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "served_at": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "domain",
+        "pam_payload"
+      ]
+    }
+  }
+}

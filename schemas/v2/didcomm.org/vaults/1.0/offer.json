@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "vaults/1.0/offer",
+  "description": "Offers a ready vault. Threaded under the workflow with pthid.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "thid",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/vaults/1.0/offer"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "vault_descriptor": {
+          "type": "object",
+          "description": "An Encrypted Data Vault (EDV) and how it's governed.",
+          "required": [
+            "vault_id",
+            "controller",
+            "base_url"
+          ],
+          "properties": {
+            "vault_id": {
+              "type": "string"
+            },
+            "controller": {
+              "type": "string"
+            },
+            "base_url": {
+              "type": "string"
+            },
+            "zcap_root": {
+              "type": "object"
+            },
+            "encryption": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "string"
+                },
+                "index_hmac": {
+                  "type": "string"
+                }
+              }
+            },
+            "retention": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "ephemeral",
+                    "durable"
+                  ]
+                },
+                "expires_at": {
+                  "type": "string"
+                }
+              }
+            },
+            "backend": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "hints": {
+                  "type": "object"
+                }
+              }
+            },
+            "limits": {
+              "type": "object",
+              "properties": {
+                "max_docs": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "max_bytes": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "max_doc_bytes": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "index_schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "provisioner": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "vault_descriptor"
+      ]
+    }
+  }
+}

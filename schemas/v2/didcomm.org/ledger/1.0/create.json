@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ledger/1.0/create",
+  "description": "Proposes a shared expense ledger to its participants.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/ledger/1.0/create"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "ledger": {
+          "type": "object",
+          "required": [
+            "ledger_id",
+            "name",
+            "participants",
+            "currency",
+            "rules"
+          ],
+          "properties": {
+            "ledger_id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "participants": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "type": "object",
+                "required": [
+                  "did"
+                ],
+                "properties": {
+                  "did": {
+                    "type": "string"
+                  },
+                  "alias": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "currency": {
+              "type": "object",
+              "required": [
+                "code",
+                "decimals"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "description": "ISO 4217."
+                },
+                "decimals": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "asset": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "description": "CAIP-19 asset, for crypto-denominated ledgers."
+            },
+            "rules": {
+              "type": "object",
+              "properties": {
+                "default_split": {
+                  "type": "string"
+                },
+                "require_ack": {
+                  "type": "boolean"
+                },
+                "settle_threshold": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "entry_ttl_days": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "auto_settle": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "created_at": {
+              "type": "string"
+            },
+            "created_by": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "required": [
+        "ledger"
+      ]
+    }
+  }
+}
