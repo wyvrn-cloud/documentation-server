@@ -40,13 +40,16 @@ pub struct IndexConfig {
     #[serde(default)]
     pub schemas: Vec<PathBuf>,
     pub mappings: Option<PathBuf>,
+    /// Source name → commit, for when `git rev-parse` can't tell (the container image
+    /// has no `.git`). See `sources/revisions.toml`.
+    pub revisions: Option<PathBuf>,
     #[serde(default = "default_max_query_limit")]
     pub max_query_limit: usize,
 }
 
 impl Default for IndexConfig {
     fn default() -> Self {
-        Self { schemas: Vec::new(), mappings: None, max_query_limit: default_max_query_limit() }
+        Self { schemas: Vec::new(), mappings: None, revisions: None, max_query_limit: default_max_query_limit() }
     }
 }
 
@@ -62,7 +65,8 @@ pub struct SourceConfig {
     /// For `protocol-registry`: the PIURI prefix a folder `<name>/<version>` is expected
     /// to have, for the folder/PIURI consistency check.
     pub piuri_base: Option<String>,
-    /// Overrides the source revision otherwise read with `git rev-parse` (e.g. in a
+    /// Overrides the source revision otherwise read with `git rev-parse`, or else from
+    /// `index.revisions` (e.g. in a
     /// container image built without `.git`).
     pub revision: Option<String>,
 }

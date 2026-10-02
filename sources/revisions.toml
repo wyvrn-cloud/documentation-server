@@ -1,0 +1,5 @@
+# The commit of each submodule in sources/, by source name -- for the container image,
+# which has no .git to ask (see index.revisions in config/default.toml). Kept in sync by
+# scripts/update-sources.sh; tests/index.rs fails if it disagrees with the submodules.
+"didcomm.org" = "a26926c03268f67f2a9e0efec599865071cc9688"
+"didcomm-messaging" = "c78bcc425f9546200e77151d2752b8317d3eae00"
