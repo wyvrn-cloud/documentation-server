@@ -51,6 +51,8 @@ COPY mappings mappings
 COPY schemas schemas
 # Only what the index reads: protocol definitions, and the spec's Markdown (not its
 # ~90 MB of images or the rendered HTML).
+# The image has no .git, so the sources' commits come from this file (index.revisions).
+COPY sources/revisions.toml sources/revisions.toml
 COPY sources/didcomm.org/site/content/protocols sources/didcomm.org/site/content/protocols
 COPY sources/didcomm-messaging/specs.json sources/didcomm-messaging/specs.json
 COPY sources/didcomm-messaging/docs/spec-files sources/didcomm-messaging/docs/spec-files

@@ -117,6 +117,17 @@ impl Index {
             None => Mappings::default(),
         };
 
+        let revisions = match &config.index.revisions {
+            Some(path) => match read_toml::<HashMap<String, String>>(path) {
+                Ok(r) => r,
+                Err(e) => {
+                    index.warnings.push(e);
+                    HashMap::new()
+                }
+            },
+            None => HashMap::new(),
+        };
+
         // Overlay schemas first; schemas shipped with a protocol replace them.
         let mut schemas = BTreeMap::new();
         for dir in &config.index.schemas {
@@ -124,8 +135,8 @@ impl Index {
         }
         for source in &config.sources {
             match source.kind {
-                SourceKind::ProtocolRegistry => index.index_registry(source, &mappings, &mut schemas),
-                SourceKind::DidcommSpec => index.index_spec(source),
+                SourceKind::ProtocolRegistry => index.index_registry(source, &revisions, &mappings, &mut schemas),
+                SourceKind::DidcommSpec => index.index_spec(source, &revisions),
             }
         }
         index.attach_schemas(schemas);
@@ -170,8 +181,14 @@ impl Index {
         }
     }
 
-    fn index_registry(&mut self, source: &SourceConfig, mappings: &Mappings, schemas: &mut BTreeMap<String, Value>) {
-        let revision = revision(source);
+    fn index_registry(
+        &mut self,
+        source: &SourceConfig,
+        revisions: &HashMap<String, String>,
+        mappings: &Mappings,
+        schemas: &mut BTreeMap<String, Value>,
+    ) {
+        let revision = revision(source, revisions);
         let mut readmes = Vec::new();
         for name in read_dir_sorted(&source.path) {
             for version in read_dir_sorted(&name) {
@@ -235,7 +252,7 @@ impl Index {
         }
     }
 
-    fn index_spec(&mut self, source: &SourceConfig) {
+    fn index_spec(&mut self, source: &SourceConfig, revisions: &HashMap<String, String>) {
         #[derive(Deserialize)]
         struct SpecsJson {
             specs: Vec<SpecEntry>,
@@ -256,7 +273,7 @@ impl Index {
                 return;
             }
         };
-        let revision = revision(source);
+        let revision = revision(source, revisions);
         for spec in specs.specs {
             let version = spec_version(&spec.title);
             let dir = source.path.join(spec.spec_directory.trim_start_matches("./"));
@@ -458,21 +475,23 @@ fn relative(path: &Path, base: &Path) -> String {
     path.strip_prefix(base).unwrap_or(path).to_string_lossy().replace('\\', "/")
 }
 
-fn revision(source: &SourceConfig) -> Option<String> {
+/// A source's commit: the config's explicit `revision`, else what `git rev-parse` says
+/// (the live truth when there's a checkout), else the `index.revisions` file (for the
+/// container image, which has neither `.git` nor git).
+fn revision(source: &SourceConfig, revisions: &HashMap<String, String>) -> Option<String> {
     if source.revision.is_some() {
         return source.revision.clone();
     }
-    let output = std::process::Command::new("git")
+    std::process::Command::new("git")
         .arg("-C")
         .arg(&source.path)
         .args(["rev-parse", "HEAD"])
         .output()
-        .ok()?;
-    output
-        .status
-        .success()
-        .then(|| String::from_utf8_lossy(&output.stdout).trim().to_string())
+        .ok()
+        .filter(|output| output.status.success())
+        .map(|output| String::from_utf8_lossy(&output.stdout).trim().to_string())
         .filter(|r| !r.is_empty())
+        .or_else(|| revisions.get(&source.name).cloned())
 }
 
 #[cfg(test)]
@@ -553,6 +572,22 @@ There are two roles: `pinger` and `ponger`.
     fn roles_from_list_items_or_prose() {
         assert_eq!(roles("- `mediator`: receives `forward` messages.\n- `recipient`: the target."), ["mediator", "recipient"]);
         assert_eq!(roles("There are two roles: `sender` and `receiver`."), ["sender", "receiver"]);
+    }
+
+    #[test]
+    fn revisions_fall_back_to_the_revisions_file_without_git() {
+        let source = |revision: Option<&str>| SourceConfig {
+            name: "upstream".into(),
+            kind: SourceKind::ProtocolRegistry,
+            path: PathBuf::from("/nonexistent/not-a-git-checkout"),
+            piuri_base: None,
+            revision: revision.map(str::to_string),
+        };
+        let revisions = HashMap::from([("upstream".to_string(), "abc123".to_string())]);
+
+        assert_eq!(revision(&source(None), &revisions).as_deref(), Some("abc123"));
+        assert_eq!(revision(&source(Some("explicit")), &revisions).as_deref(), Some("explicit"));
+        assert_eq!(revision(&source(None), &HashMap::new()), None);
     }
 
     #[test]

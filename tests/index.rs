@@ -92,3 +92,21 @@ fn schemas_compile_and_examples_are_reported() {
     }
     assert!(checked > 0);
 }
+
+/// `sources/revisions.toml` is what the container image (no `.git`) reports as each
+/// source's revision, so it has to match the submodule commits this repository pins.
+#[test]
+fn the_revisions_file_matches_the_submodules() {
+    let revisions: std::collections::HashMap<String, String> =
+        toml::from_str(&std::fs::read_to_string("sources/revisions.toml").unwrap()).unwrap();
+    for (name, path) in [("didcomm.org", "sources/didcomm.org"), ("didcomm-messaging", "sources/didcomm-messaging")] {
+        let output = std::process::Command::new("git").args(["ls-tree", "HEAD", path]).output().unwrap();
+        let listing = String::from_utf8(output.stdout).unwrap();
+        let pinned = listing.split_whitespace().nth(2).expect("a submodule entry");
+        assert_eq!(
+            revisions.get(name).map(String::as_str),
+            Some(pinned),
+            "sources/revisions.toml is stale for {name}; run scripts/update-sources.sh"
+        );
+    }
+}

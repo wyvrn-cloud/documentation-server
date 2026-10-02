@@ -21,8 +21,9 @@ Differences from the plan below:
 - Upstream content problems are reported separately from setup warnings, so they never
   fail startup or the tests.
 - Section listings include each heading's `level`.
-- Source revisions come from `git rev-parse`. The container image has no `.git`, so it
-  reports none unless a source sets `revision` in the config.
+- Source revisions come from `git rev-parse`, or, in the container image (which has no
+  `.git`), from `sources/revisions.toml`, which `scripts/update-sources.sh` keeps current
+  and a test checks against the submodules.
 
 ## Layout
 

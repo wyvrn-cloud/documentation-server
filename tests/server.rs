@@ -184,4 +184,5 @@ async fn smoke_test_a_running_server() {
         .await
         .unwrap();
     assert!(response["body"]["messages"].as_array().unwrap().iter().any(|m| m.get("schema").is_some()));
+    assert!(response["body"]["source"]["revision"].is_string(), "responses name their source revision");
 }
