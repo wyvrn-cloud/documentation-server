@@ -220,6 +220,33 @@ impl Registry {
                 })
                 .collect();
             reply.insert("messages".into(), json!(messages));
+            let formats: Vec<Value> = self
+                .index
+                .formats_for(&doc.piuri)
+                .into_iter()
+                .map(|f| {
+                    let mut documentation = json!({"document": f.document});
+                    if let Some(section) = &f.section {
+                        documentation["section"] = json!(section);
+                    }
+                    let uses: Vec<Value> = f
+                        .uses
+                        .iter()
+                        .map(|u| {
+                            let mut entry = json!({"message": u.message});
+                            if let Some(attachment) = &u.attachment {
+                                entry["attachment"] = json!(attachment);
+                            }
+                            entry["schema"] = u.schema.clone();
+                            entry
+                        })
+                        .collect();
+                    json!({"format": f.id, "title": f.title, "documentation": documentation, "uses": uses})
+                })
+                .collect();
+            if !formats.is_empty() {
+                reply.insert("attachment_formats".into(), json!(formats));
+            }
         }
         Ok(Value::Object(reply))
     }

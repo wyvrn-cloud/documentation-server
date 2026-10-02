@@ -187,6 +187,29 @@ async fn didcomm_v1_protocols_and_spec_come_from_the_aries_rfcs() {
 }
 
 #[tokio::test]
+async fn credential_protocols_list_their_attachment_formats() {
+    let (did, _) = start(DidMethod::Peer).await;
+
+    let issue = ask(&did, registry::REQUEST, json!({"piuri": "https://didcomm.org/issue-credential/2.0", "sections": []}))
+        .await
+        .unwrap();
+    let formats = issue["body"]["attachment_formats"].as_array().unwrap();
+    let offer = formats.iter().find(|f| f["format"] == "anoncreds/credential-offer@v1.0").unwrap();
+    assert_eq!(offer["documentation"], json!({"document": "aries/attachment-formats", "section": "rfc0771"}));
+    assert_eq!(offer["uses"][0]["message"], "https://didcomm.org/issue-credential/2.0/offer-credential");
+    assert_eq!(offer["uses"][0]["attachment"], "offers~attach");
+    assert!(offer["uses"][0]["schema"]["required"].as_array().unwrap().contains(&json!("key_correctness_proof")));
+
+    // Only with messages.
+    let lean = ask(&did, registry::REQUEST, json!({"piuri": "https://didcomm.org/issue-credential/2.0", "sections": [], "messages": false}))
+        .await
+        .unwrap();
+    assert!(lean["body"].get("attachment_formats").is_none());
+    let ping = ask(&did, registry::REQUEST, json!({"piuri": "https://didcomm.org/trust-ping/2.0", "sections": []})).await.unwrap();
+    assert!(ping["body"].get("attachment_formats").is_none());
+}
+
+#[tokio::test]
 async fn extensions_are_served_as_documents() {
     let (did, _) = start(DidMethod::Peer).await;
 

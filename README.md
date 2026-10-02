@@ -43,6 +43,11 @@ It serves:
   The table of contents lists every document served.
 - **Hand-written JSON Schemas** for the core protocols. didcomm.org has none, so they
   live in [`schemas/`](schemas/).
+- **Attachment formats** with schemas: a `response` for issue-credential 2.0/3.0 or
+  present-proof 2.0/3.0 lists the attachment formats their messages carry (26: Indy,
+  AnonCreds, JSON-LD, Data Integrity, SD-JWT, DIF Presentation Exchange and Credential
+  Manifest), each with a JSON Schema for the attachment's content per message. See
+  [`attachment-formats/`](attachment-formats/README.md).
 - Answers to `discover-features/2.0` (it discloses `documentation/1.1` and `1.0` with
   role `registry`) and `trust-ping/2.0`.
 

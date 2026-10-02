@@ -45,11 +45,20 @@ pub struct IndexConfig {
     pub revisions: Option<PathBuf>,
     #[serde(default = "default_max_query_limit")]
     pub max_query_limit: usize,
+    /// The attachment formats manifest (`attachment-formats/formats.toml`), whose schemas
+    /// sit next to it.
+    pub attachment_formats: Option<PathBuf>,
 }
 
 impl Default for IndexConfig {
     fn default() -> Self {
-        Self { schemas: Vec::new(), mappings: None, revisions: None, max_query_limit: default_max_query_limit() }
+        Self {
+            schemas: Vec::new(),
+            mappings: None,
+            revisions: None,
+            max_query_limit: default_max_query_limit(),
+            attachment_formats: None,
+        }
     }
 }
 

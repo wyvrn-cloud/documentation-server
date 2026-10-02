@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://docs.wyvrn.app/attachment-formats/dif/presentation-exchange/definitions@v1.0/propose-presentation.json",
+  "title": "DIF Presentation Exchange definition (dif/presentation-exchange/definitions@v1.0) in propose-presentation",
+  "description": "A DIF Presentation Exchange presentation definition.",
+  "type": "object",
+  "required": [
+    "input_descriptors"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "purpose": {
+      "type": "string"
+    },
+    "format": {
+      "type": "object"
+    },
+    "submission_requirements": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "frame": {
+      "type": "object"
+    },
+    "input_descriptors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "group": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "schema": {},
+          "format": {
+            "type": "object"
+          },
+          "constraints": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}

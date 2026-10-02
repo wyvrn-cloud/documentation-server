@@ -56,6 +56,7 @@ COPY --from=builder /build/target/release/documentation-server /usr/local/bin/do
 COPY config config
 COPY mappings mappings
 COPY schemas schemas
+COPY attachment-formats attachment-formats
 # Only what the index reads: protocol definitions, and the spec's and its extensions'
 # Markdown (not its ~90 MB of images or the rendered HTML).
 # The image has no .git, so the sources' commits come from this file (index.revisions).

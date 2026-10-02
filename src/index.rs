@@ -240,6 +240,8 @@ pub struct Index {
     /// mismatches, invalid or orphaned schemas, ...). Logged at startup; the index test
     /// requires none for the repository's own configuration.
     pub warnings: Vec<String>,
+    /// Attachment formats issue-credential and present-proof carry (see `formats`).
+    pub attachment_formats: Vec<crate::formats::AttachmentFormat>,
     /// Problems in the upstream content itself, e.g. an example that isn't even JSON5.
     /// Logged and reported, never fatal: the example still reaches requesters inside
     /// its section's Markdown, just not under `messages`.
@@ -319,6 +321,9 @@ impl Index {
         }
         index.attach_schemas(schemas);
         index.check_aliases();
+        if let Some(path) = &config.index.attachment_formats {
+            index.load_attachment_formats(path);
+        }
         index
     }
 

@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://docs.wyvrn.app/attachment-formats/anoncreds/proof@v1.0/presentation.json",
+  "title": "AnonCreds proof (anoncreds/proof@v1.0) in presentation",
+  "type": "object",
+  "required": [
+    "proof",
+    "requested_proof",
+    "identifiers"
+  ],
+  "properties": {
+    "proof": {
+      "type": "object",
+      "required": [
+        "proofs",
+        "aggregated_proof"
+      ]
+    },
+    "requested_proof": {
+      "type": "object",
+      "properties": {
+        "revealed_attrs": {
+          "type": "object"
+        },
+        "revealed_attr_groups": {
+          "type": "object"
+        },
+        "self_attested_attrs": {
+          "type": "object"
+        },
+        "unrevealed_attrs": {
+          "type": "object"
+        },
+        "predicates": {
+          "type": "object"
+        }
+      }
+    },
+    "identifiers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "schema_id",
+          "cred_def_id"
+        ],
+        "properties": {
+          "schema_id": {
+            "type": "string"
+          },
+          "cred_def_id": {
+            "type": "string"
+          },
+          "rev_reg_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "timestamp": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
