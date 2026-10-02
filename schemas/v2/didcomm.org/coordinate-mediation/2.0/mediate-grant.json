@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "coordinate-mediation/2.0/mediate-grant",
+  "description": "Mediator grants mediation. The recipient uses routing_did as the endpoint in its own DID documents, then registers them with keylist-update.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "thid",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/coordinate-mediation/2.0/mediate-grant"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "required": [
+        "routing_did"
+      ],
+      "properties": {
+        "routing_did": {
+          "type": "string",
+          "pattern": "^did:[a-z0-9]+:[^#]+$",
+          "description": "The mediator DID to use as the recipient's service endpoint (an array from 3.0 on)."
+        }
+      }
+    }
+  }
+}

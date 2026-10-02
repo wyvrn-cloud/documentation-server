@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "data-agreement-proofs/1.0/verify-response",
+  "description": "The auditor's verdict on the proof chain: status OK when it verifies, with explain. These pages mix DIDComm v1 conventions into v2 messages (~thread instead of thid, fields outside body); the schema accepts what they show.",
+  "type": "object",
+  "required": [
+    "id",
+    "type"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/data-agreement-proofs/1.0/verify-response"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "explain": {
+          "type": "string"
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "description": "OK when the proof chain verifies."
+    },
+    "explain": {
+      "type": "string"
+    },
+    "~thread": {
+      "type": "object",
+      "required": [
+        "thid"
+      ],
+      "properties": {
+        "thid": {
+          "type": "string"
+        }
+      },
+      "description": "The pages use ~thread for the thread id; thid is the DIDComm v2 header."
+    }
+  },
+  "anyOf": [
+    {
+      "required": [
+        "thid"
+      ]
+    },
+    {
+      "required": [
+        "~thread"
+      ]
+    }
+  ]
+}

@@ -221,3 +221,34 @@ fn waci_defines_the_v2_credential_protocols() {
     let profile = &index.documents["waci-didcomm"];
     assert!(profile.versions["1.0"].sections.iter().any(|s| s.title == "Interoperability Profile"));
 }
+
+/// Shared definitions (decorators, attachments) are copied into each schema's $defs so
+/// every file stands alone; this keeps the copies identical to schema-defs/.
+#[test]
+fn shared_schema_definitions_match_the_canonical_ones() {
+    let canonical = |style: &str| -> serde_json::Map<String, serde_json::Value> {
+        serde_json::from_str(&std::fs::read_to_string(format!("schema-defs/{style}.json")).unwrap()).unwrap()
+    };
+    let mut checked = 0;
+    for style in ["v1", "v2"] {
+        let shared = canonical(style);
+        let mut stack = vec![std::path::PathBuf::from("schemas").join(style)];
+        while let Some(dir) = stack.pop() {
+            for entry in std::fs::read_dir(&dir).unwrap().flatten() {
+                let path = entry.path();
+                if path.is_dir() {
+                    stack.push(path);
+                    continue;
+                }
+                let schema: serde_json::Value = serde_json::from_str(&std::fs::read_to_string(&path).unwrap()).unwrap();
+                for (name, definition) in schema["$defs"].as_object().into_iter().flatten() {
+                    if let Some(expected) = shared.get(name) {
+                        assert_eq!(definition, expected, "{}: $defs.{name} differs from schema-defs/{style}.json", path.display());
+                        checked += 1;
+                    }
+                }
+            }
+        }
+    }
+    assert!(checked > 0);
+}

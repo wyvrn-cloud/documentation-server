@@ -1,0 +1,246 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "revocation_notification/2.0/revoke",
+  "description": "Tells the holder a credential was revoked (Aries RFC 0721).",
+  "type": "object",
+  "required": [
+    "@id",
+    "@type",
+    "revocation_format",
+    "credential_id"
+  ],
+  "properties": {
+    "@id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender (Aries RFC 0008)."
+    },
+    "@type": {
+      "enum": [
+        "https://didcomm.org/revocation_notification/2.0/revoke",
+        "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/revocation_notification/2.0/revoke"
+      ],
+      "description": "The did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/ form is the legacy equivalent (Aries RFC 0348)."
+    },
+    "~thread": {
+      "$ref": "#/$defs/thread"
+    },
+    "~l10n": {
+      "$ref": "#/$defs/l10n"
+    },
+    "~timing": {
+      "$ref": "#/$defs/timing"
+    },
+    "~transport": {
+      "$ref": "#/$defs/transport"
+    },
+    "~please_ack": {
+      "$ref": "#/$defs/please_ack"
+    },
+    "~service": {
+      "$ref": "#/$defs/service"
+    },
+    "~trace": {
+      "$ref": "#/$defs/trace"
+    },
+    "revocation_format": {
+      "type": "string",
+      "description": "indy-anoncreds or anoncreds; more may be added."
+    },
+    "credential_id": {
+      "type": "string",
+      "description": "For indy-anoncreds and anoncreds: <revocation-registry-id>::<credential-revocation-id>."
+    },
+    "comment": {
+      "type": "string",
+      "description": "Human-readable; follows the l10n conventions (Aries RFC 0043)."
+    }
+  },
+  "$defs": {
+    "thread": {
+      "type": "object",
+      "description": "~thread decorator (Aries RFC 0008). thid: the @id of the message that started the thread; pthid: the parent thread's id.",
+      "properties": {
+        "thid": {
+          "type": "string"
+        },
+        "pthid": {
+          "type": "string"
+        },
+        "sender_order": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "received_orders": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "goal_code": {
+          "type": "string"
+        }
+      }
+    },
+    "l10n": {
+      "type": "object",
+      "description": "~l10n decorator (Aries RFC 0043): the message's locale (locale), or, for advanced cases, locales, catalogs and per-field localization.",
+      "properties": {
+        "locale": {
+          "type": "string"
+        },
+        "locales": {
+          "type": "object"
+        },
+        "catalogs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "timing": {
+      "type": "object",
+      "description": "~timing decorator (Aries RFC 0032). Times are ISO 8601 UTC.",
+      "properties": {
+        "in_time": {
+          "type": "string"
+        },
+        "out_time": {
+          "type": "string"
+        },
+        "stale_time": {
+          "type": "string"
+        },
+        "expires_time": {
+          "type": "string"
+        },
+        "delay_milli": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "wait_until_time": {
+          "type": "string"
+        }
+      }
+    },
+    "transport": {
+      "type": "object",
+      "description": "~transport decorator (Aries RFC 0092): return_route asks for replies on the same connection.",
+      "properties": {
+        "return_route": {
+          "enum": [
+            "none",
+            "all",
+            "thread"
+          ]
+        },
+        "return_route_thread": {
+          "type": "string"
+        }
+      }
+    },
+    "please_ack": {
+      "type": "object",
+      "description": "~please_ack decorator (retired Aries RFC 0317): asks for an ack on receipt and/or outcome.",
+      "properties": {
+        "on": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "RECEIPT",
+              "OUTCOME"
+            ]
+          }
+        }
+      }
+    },
+    "service": {
+      "type": "object",
+      "description": "~service decorator (Aries RFC 0056): where to send a reply when there is no connection.",
+      "properties": {
+        "recipientKeys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "routingKeys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "serviceEndpoint": {
+          "type": "string"
+        }
+      }
+    },
+    "trace": {
+      "type": "object",
+      "description": "~trace decorator (Aries RFC 0034).",
+      "properties": {
+        "target": {
+          "type": "string"
+        },
+        "full_thread": {
+          "type": "boolean"
+        },
+        "trace_reports": {
+          "type": "array"
+        }
+      }
+    },
+    "attachment": {
+      "type": "object",
+      "description": "An attachment descriptor (Aries RFC 0017). data carries the content inline (base64 or json) or by reference (links, with sha256).",
+      "required": [
+        "data"
+      ],
+      "properties": {
+        "@id": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "filename": {
+          "type": "string"
+        },
+        "mime-type": {
+          "type": "string"
+        },
+        "lastmod_time": {
+          "type": "string"
+        },
+        "byte_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "jws": {
+              "type": "object"
+            },
+            "sha256": {
+              "type": "string"
+            },
+            "links": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "base64": {
+              "type": "string"
+            },
+            "json": {}
+          }
+        }
+      }
+    }
+  }
+}
