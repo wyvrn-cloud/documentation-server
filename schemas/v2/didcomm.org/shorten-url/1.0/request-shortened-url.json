@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "shorten-url/1.0/request-shortened-url",
+  "description": "Asks the url-shortener for a short URL. requested_validity_seconds 0 asks for no expiry; short_url_slug is a wish the shortener may refuse.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/shorten-url/1.0/request-shortened-url"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "The URL to shorten."
+        },
+        "requested_validity_seconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "goal_code": {
+          "type": "string",
+          "description": "What the URL is for, e.g. shorten.oobv1, shorten.oobv2."
+        },
+        "short_url_slug": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "url",
+        "requested_validity_seconds",
+        "goal_code"
+      ]
+    }
+  }
+}

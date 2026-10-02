@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "calendar/1.0/delegate",
+  "description": "An invitee delegates its place (full) or adds an observer (observe), with a signed delegation token.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "thid",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/calendar/1.0/delegate"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "description": "The event's id (evt-<uuid>); also the thid of every message about it."
+        },
+        "delegator": {
+          "type": "string"
+        },
+        "delegate_to": {
+          "type": "string"
+        },
+        "scope": {
+          "enum": [
+            "full",
+            "observe"
+          ]
+        },
+        "reason": {
+          "type": "string"
+        },
+        "delegation_token": {
+          "type": "object",
+          "required": [
+            "event_id",
+            "delegator",
+            "delegate",
+            "scope",
+            "jws"
+          ],
+          "properties": {
+            "event_id": {
+              "type": "string"
+            },
+            "delegator": {
+              "type": "string"
+            },
+            "delegate": {
+              "type": "string"
+            },
+            "scope": {
+              "enum": [
+                "full",
+                "observe"
+              ]
+            },
+            "issued_at": {
+              "type": "string",
+              "description": "ISO 8601, UTC."
+            },
+            "expires_at": {
+              "type": "string",
+              "description": "ISO 8601, UTC."
+            },
+            "jws": {
+              "type": "string",
+              "description": "Signed by the delegator over the other fields."
+            }
+          }
+        }
+      },
+      "required": [
+        "event_id",
+        "delegator",
+        "delegate_to",
+        "scope",
+        "delegation_token"
+      ]
+    }
+  }
+}

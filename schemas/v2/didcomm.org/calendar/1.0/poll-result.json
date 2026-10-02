@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "calendar/1.0/poll-result",
+  "description": "Announces the chosen time option; proceed true means an invite follows.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "thid",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/calendar/1.0/poll-result"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "description": "The event's id (evt-<uuid>); also the thid of every message about it."
+        },
+        "selected_option": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "tallies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "option_id"
+            ],
+            "properties": {
+              "option_id": {
+                "type": "string"
+              },
+              "yes": {
+                "type": "integer"
+              },
+              "if_needed": {
+                "type": "integer"
+              },
+              "no": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "quorum_met": {
+          "type": "boolean"
+        },
+        "proceed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "event_id",
+        "proceed"
+      ]
+    }
+  }
+}

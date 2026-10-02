@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "webrtc/1.0/propose",
+  "description": "The caller requests a WebRTC session with the given media and ICE policy. Authcrypt.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/webrtc/1.0/propose"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "media": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "audio",
+              "video",
+              "screen"
+            ]
+          }
+        },
+        "data": {
+          "type": "boolean"
+        },
+        "topology": {
+          "enum": [
+            "mesh",
+            "sfu"
+          ]
+        },
+        "trickle": {
+          "type": "boolean"
+        },
+        "policy": {
+          "type": "string",
+          "description": "e.g. relay-preferred."
+        },
+        "ice_servers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "urls"
+            ],
+            "properties": {
+              "urls": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "username": {
+                "type": "string"
+              },
+              "credential": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "media"
+      ]
+    },
+    "oob_thid": {
+      "type": "string",
+      "description": "Required on the first message after an out-of-band invite link: the invitation's thid."
+    }
+  }
+}

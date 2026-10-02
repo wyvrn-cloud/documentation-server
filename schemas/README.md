@@ -1,8 +1,8 @@
 # Schemas
 
-Hand-written JSON Schemas for protocols whose upstream definitions don't include any.
-That is currently every protocol on didcomm.org. The server merges these into
-`documentation/1.0` responses for the matching message types.
+Hand-written JSON Schemas for protocols whose upstream definitions don't include any:
+currently every protocol on didcomm.org, in the Aries RFCs and in WACI-DIDComm. The
+server merges these into `documentation` responses for the matching message types.
 
 ## Layout
 
@@ -119,6 +119,25 @@ defines a decorator, not messages.
 | `n-wise/1.0` | v1 | `invitation`, `ledger-update-notify` |
 | `drpc/1.0` | v1 | `request`, `response` (JSON-RPC), `problem-report` |
 
+### Tier 3: Proposed and Draft
+
+| Protocol | Style | Messages |
+|---|---|---|
+| `issue-credential/3.0`, `present-proof/3.0` (WACI-DIDComm) | v2 | as in 2.0, with each attachment's `format`; `ack`, `problem-report` |
+| `calendar/1.0` | v2 | propose, invite, accept/decline/tentative, update, cancel, availability, delegation, reminder, recurrence-exception, poll vote/result |
+| `ledger/1.0` | v2 | create, accept, entry, ack, reject, adjust, settle, settle-confirm, sync, close |
+| `mesh/1.0` | v2 | announce, relay, leave, gateway-update (JSON form) |
+| `pam/1.0`, `poe/1.0` | v2 | fetch/publish; request, propose, accept/decline, challenge, submit, complete |
+| `pq-bridge/1.0` | v2 | upgrade propose/accept/decline, kem-exchange, kem-confirm, rotate-key, pq-envelope, pq-signature |
+| `shorten-url/1.0` | v2 + v1 | request, shortened-url, invalidate (v1 `ack`) |
+| `swarm/1.0` | v2 | store request/receipt/decline, ping/pong-commitment, pledge-status, retrieve, release, find-pledgers |
+| `vaults/1.0` | v2 | propose, offer, grant-access, notify, replicate (+ receipt), seal, tombstone |
+| `webrtc/1.0` | v2 | invite-url, mesh signalling (propose, offer, answer, ice, ...), SFU rooms, ping/pong |
+| `introduce/1.0`, `help-me-discover/1.0` | v1 | proposal, response, request; request, response |
+| `messagepickup/1.0`, `transferpolicy/1.0` | v1 | status, batch and list pickup, noop; policy, share and change requests |
+| `push-notifications-apns`, `-fcm`, `-expo/1.0` | v1 | set-device-info, get-device-info, device-info |
+| `did_resolution/0.1`, `vdrproxy/1.0`, `trust-input/1.0`, `tracing/1.0` | v1 | resolve(_result); request, response; query, response; trace_report |
+
 ## Validation notes (2026-10-01)
 
 - All schemas pass the JSON Schema 2020-12 meta-schema.
@@ -158,3 +177,11 @@ defines a decorator, not messages.
 in the examples: enum alternatives written as `"a|b|c"` (payments), examples without
 `id` or `~thread`, survey's response example reusing the request's type, and
 `expires_time` given as an ISO string where DIDComm v2 uses epoch seconds.
+
+## Validation notes, tier 3 (2026-10-02)
+
+266 upstream examples are now checked; tier 3 adds 22 mismatches, again all shortcuts in
+the examples: descriptive placeholders where base64url values go (`"<8 bytes,
+base64url>"`, `"BASE64URL(32-bytes)"`), `%VER` in the WACI examples, replies without
+`thid` / `~thread` or `@id`, ledger's `{"...": "entry at seq 9"}` stand-ins, and a key id
+in `from` where DIDComm v2 wants a DID.

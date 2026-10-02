@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "pq-bridge/1.0/pq-signature",
+  "description": "An ML-DSA signature over a referenced object (a message, attachment, digest or URI). MUST be authcrypted; thid identifies the PQ session.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "thid",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/pq-bridge/1.0/pq-signature"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "covers": {
+          "type": "object",
+          "required": [
+            "type",
+            "value"
+          ],
+          "properties": {
+            "type": {
+              "enum": [
+                "message-id",
+                "digest-only",
+                "attachment-id",
+                "external-uri"
+              ]
+            },
+            "value": {
+              "type": "string"
+            }
+          }
+        },
+        "digest": {
+          "type": "string"
+        },
+        "alg": {
+          "type": "string"
+        },
+        "ephemeral_did": {
+          "type": "string",
+          "pattern": "^did:",
+          "description": "A fresh ephemeral DID for this PQ session (never reused)."
+        },
+        "kid": {
+          "type": "string"
+        },
+        "signature": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]*$",
+          "description": "base64url"
+        }
+      },
+      "required": [
+        "covers",
+        "digest",
+        "alg",
+        "ephemeral_did",
+        "kid",
+        "signature"
+      ]
+    }
+  }
+}

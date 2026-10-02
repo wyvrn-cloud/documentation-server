@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "poe/1.0/request-poe",
+  "description": "Asks the prover to run a program and return a proof of execution. programs are options in order of preference.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/poe/1.0/request-poe"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "programs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "program_id"
+            ],
+            "properties": {
+              "program_id": {
+                "type": "string"
+              },
+              "public_constraints": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "bind_to_context": {
+          "type": "object",
+          "description": "Binds the proof to this session.",
+          "properties": {
+            "nonce": {
+              "type": "string"
+            },
+            "context_hash": {
+              "type": "string"
+            },
+            "session_id": {
+              "type": "string"
+            }
+          }
+        },
+        "inputs": {
+          "type": "object",
+          "properties": {
+            "schema": {
+              "type": "string"
+            },
+            "by_value": {
+              "type": "object"
+            },
+            "by_ref": {
+              "type": "object"
+            }
+          }
+        },
+        "disclosure": {
+          "type": "string",
+          "description": "What is disclosed beyond the ZK proof, e.g. proof-only."
+        },
+        "expiry": {
+          "type": "string"
+        },
+        "transport_hints": {
+          "type": "object"
+        },
+        "policy": {
+          "type": "object",
+          "properties": {
+            "max_runtime_s": {
+              "type": "integer"
+            },
+            "max_artifact_mb": {
+              "type": "integer"
+            }
+          }
+        }
+      },
+      "required": [
+        "programs",
+        "bind_to_context"
+      ]
+    }
+  }
+}

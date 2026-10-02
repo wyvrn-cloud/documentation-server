@@ -1,0 +1,223 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ledger/1.0/entry",
+  "description": "Adds an expense, hash-chained to the previous entry and signed by its creator.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "thid",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/ledger/1.0/entry"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "entry": {
+          "type": "object",
+          "description": "A hash-chained, signed ledger entry.",
+          "required": [
+            "entry_id",
+            "seq",
+            "prev_hash",
+            "type",
+            "paid_by",
+            "amount",
+            "split",
+            "description",
+            "timestamp",
+            "signature",
+            "entry_hash"
+          ],
+          "properties": {
+            "entry_id": {
+              "type": "string"
+            },
+            "ledger_id": {
+              "type": "string"
+            },
+            "seq": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "prev_hash": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The previous entry's entry_hash; null for the first."
+            },
+            "type": {
+              "enum": [
+                "expense",
+                "settlement",
+                "adjustment"
+              ]
+            },
+            "paid_by": {
+              "type": "string"
+            },
+            "amount": {
+              "type": "object",
+              "required": [
+                "quantity"
+              ],
+              "properties": {
+                "quantity": {
+                  "type": "string",
+                  "pattern": "^-?[0-9]+$",
+                  "description": "Atomic units."
+                },
+                "display": {
+                  "type": "object",
+                  "properties": {
+                    "currency": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "split": {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "enum": [
+                    "equal",
+                    "exact",
+                    "percentage",
+                    "shares"
+                  ]
+                },
+                "among": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "equal: who shares it (everyone when omitted)."
+                },
+                "amounts": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string",
+                    "pattern": "^-?[0-9]+$",
+                    "description": "Atomic units."
+                  },
+                  "description": "exact: per-DID amounts summing to amount.quantity."
+                },
+                "percentages": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "description": "percentage: per-DID percentages summing to 100."
+                },
+                "shares": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "description": "shares: per-DID ratios."
+                }
+              }
+            },
+            "description": {
+              "type": "string"
+            },
+            "category": {
+              "type": "string"
+            },
+            "occurred_at": {
+              "type": "string"
+            },
+            "timestamp": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Milliseconds since the epoch."
+            },
+            "attachments": {
+              "type": "array"
+            },
+            "ref_entry_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "signature": {
+              "type": "string",
+              "description": "DID-JWS by the creator over entry_hash."
+            },
+            "ack_signatures": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "status": {
+              "enum": [
+                "pending",
+                "confirmed",
+                "disputed",
+                "voided"
+              ]
+            },
+            "entry_hash": {
+              "type": "string",
+              "description": "SHA-256 over the JCS-canonicalized entry body."
+            }
+          }
+        }
+      },
+      "required": [
+        "entry"
+      ]
+    }
+  }
+}

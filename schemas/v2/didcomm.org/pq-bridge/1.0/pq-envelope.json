@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "pq-bridge/1.0/pq-envelope",
+  "description": "Wraps an inner DIDComm message (or other payload) in an AEAD envelope under the session key; signed in signing modes. MUST be authcrypted; thid identifies the PQ session.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "thid",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/pq-bridge/1.0/pq-envelope"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "suite": {
+          "type": "string"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Key generation; 0 for the first exchange."
+        },
+        "mode": {
+          "type": "string"
+        },
+        "ephemeral_did": {
+          "type": "string",
+          "pattern": "^did:",
+          "description": "A fresh ephemeral DID for this PQ session (never reused)."
+        },
+        "kid": {
+          "type": "string"
+        },
+        "aad": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]*$",
+          "description": "base64url"
+        },
+        "nonce": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]*$",
+          "description": "base64url"
+        },
+        "ciphertext": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]*$",
+          "description": "base64url"
+        },
+        "signature": {
+          "type": "object",
+          "required": [
+            "alg",
+            "kid",
+            "value"
+          ],
+          "properties": {
+            "alg": {
+              "type": "string"
+            },
+            "kid": {
+              "type": "string"
+            },
+            "value": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "required": [
+        "suite",
+        "generation",
+        "ephemeral_did",
+        "kid",
+        "aad",
+        "nonce",
+        "ciphertext"
+      ]
+    }
+  }
+}
