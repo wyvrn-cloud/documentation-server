@@ -6,3 +6,7 @@
 	path = sources/didcomm-messaging
 	url = https://github.com/decentralized-identity/didcomm-messaging
 	shallow = true
+[submodule "sources/aries-rfcs"]
+	path = sources/aries-rfcs
+	url = https://github.com/hyperledger/aries-rfcs
+	shallow = true

@@ -26,7 +26,63 @@ fn indexes_everything_without_warnings() {
         .filter(|version| version.path().join("readme.md").is_file())
         .count();
     assert!(readmes >= 50, "expected the full didcomm.org registry, found {readmes} definitions");
-    assert_eq!(index.protocols.len(), readmes);
+    let from_didcomm_org = index.protocols.values().filter(|d| d.source.name == "didcomm.org").count();
+    let from_aries = index.protocols.values().filter(|d| d.source.name == "aries-rfcs").count();
+    // Every didcomm.org page is indexed, except stubs an Aries RFC replaced.
+    let replaced = readmes - from_didcomm_org;
+    assert!((10..=20).contains(&replaced), "{replaced} didcomm.org stubs replaced");
+    assert!(from_aries >= 40, "{from_aries} protocols from the Aries RFCs");
+    assert_eq!(index.protocols.len(), from_didcomm_org + from_aries);
+}
+
+#[test]
+fn aries_rfcs_define_the_didcomm_v1_protocols() {
+    let index = index();
+    // A didcomm.org page that only links to the RFC is replaced by the RFC.
+    let exchange = &index.protocols["https://didcomm.org/didexchange/1.1"];
+    assert_eq!(exchange.source.name, "aries-rfcs");
+    assert_eq!(exchange.source.path, "features/0023-did-exchange/README.md");
+    assert_eq!(exchange.status, "Adopted");
+    assert_eq!(exchange.didcomm_versions(), ["^1.0"]);
+    assert!(exchange.aliases.contains(&"did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/didexchange/1.1".to_string()));
+    let types: Vec<_> = exchange.messages.iter().map(|m| m.message_type.as_str()).collect();
+    for name in ["request", "response", "complete"] {
+        assert!(types.contains(&format!("https://didcomm.org/didexchange/1.1/{name}").as_str()), "{types:?}");
+    }
+    // Placeholders in the RFC's types are filled in.
+    let oob = &index.protocols["https://didcomm.org/out-of-band/1.1"];
+    assert!(oob.message("https://didcomm.org/out-of-band/1.1/invitation").is_some());
+    let mediation = &index.protocols["https://didcomm.org/coordinate-mediation/1.0"];
+    assert_eq!(mediation.messages.len(), 7, "{:?}", mediation.messages.iter().map(|m| &m.message_type).collect::<Vec<_>>());
+    // Both spellings of trust ping, and the legacy prefix, find the same protocol.
+    for requested in [
+        "https://didcomm.org/trust_ping/1.0/ping",
+        "https://didcomm.org/trust-ping/1.0",
+        "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/trust_ping/1.0/ping",
+    ] {
+        assert_eq!(index.resolve_protocol(requested).unwrap().piuri, "https://didcomm.org/trust_ping/1.0", "{requested}");
+    }
+    // DIDComm v2 protocols are untouched.
+    assert_eq!(index.protocols["https://didcomm.org/coordinate-mediation/3.0"].source.name, "didcomm.org");
+}
+
+#[test]
+fn didcomm_v1_and_the_attachment_formats_are_documents() {
+    let index = index();
+    let v1 = index.resolve_spec(Some("1.0")).unwrap();
+    assert_eq!(v1.title, "DIDComm Messaging v1 (Aries RFCs)");
+    assert_eq!(v1.didcomm_versions, ["^1.0"]);
+    let ids: Vec<_> = v1.sections.iter().map(|s| s.id.as_str()).collect();
+    for id in ["rfc0005", "rfc0008", "rfc0011", "rfc0017", "rfc0043", "rfc0092"] {
+        assert!(ids.contains(&id), "{id} missing");
+    }
+    assert!(v1.sections.iter().any(|s| s.id.starts_with("rfc0043-") && s.markdown.contains("~l10n")));
+    // The newest published spec is still the default.
+    assert_eq!(index.resolve_spec(None).unwrap().version, "2.1");
+
+    let formats = &index.documents["aries/attachment-formats"];
+    assert_eq!(formats.didcomm_versions, ["^1.0"]);
+    assert!(formats.versions["current"].sections.iter().any(|s| s.id == "rfc0592"));
 }
 
 #[test]
@@ -41,10 +97,10 @@ fn mismatched_folders_are_indexed_by_piuri() {
 fn serves_every_spec_version() {
     let index = index();
     let spec = &index.documents["spec"];
-    assert_eq!(spec.versions_newest_first(), ["2.1", "2.0", "editors-draft"]);
+    assert_eq!(spec.versions_newest_first(), ["2.1", "2.0", "1.0", "editors-draft"]);
     assert_eq!(index.resolve_spec(None).unwrap().version, "2.1");
     assert_eq!(spec.versions["2.0"].didcomm_versions, ["~2.0"]);
-    for spec in spec.versions.values() {
+    for spec in spec.versions.values().filter(|v| v.version != "1.0") {
         assert!(spec.sections.iter().any(|s| s.id == "message-headers"), "{} lacks message-headers", spec.version);
         assert!(spec.sections.len() > 100);
     }
@@ -106,7 +162,11 @@ fn schemas_compile_and_examples_are_reported() {
 fn the_revisions_file_matches_the_submodules() {
     let revisions: std::collections::HashMap<String, String> =
         toml::from_str(&std::fs::read_to_string("sources/revisions.toml").unwrap()).unwrap();
-    for (name, path) in [("didcomm.org", "sources/didcomm.org"), ("didcomm-messaging", "sources/didcomm-messaging")] {
+    for (name, path) in [
+        ("didcomm.org", "sources/didcomm.org"),
+        ("didcomm-messaging", "sources/didcomm-messaging"),
+        ("aries-rfcs", "sources/aries-rfcs"),
+    ] {
         let output = std::process::Command::new("git").args(["ls-tree", "HEAD", path]).output().unwrap();
         let listing = String::from_utf8(output.stdout).unwrap();
         let pinned = listing.split_whitespace().nth(2).expect("a submodule entry");

@@ -73,6 +73,9 @@ pub struct SourceConfig {
     /// declare its own (e.g. `["^1.0"]` for the Aries RFCs). Unset = work them out from
     /// each protocol's examples and schemas.
     pub didcomm_versions: Option<Vec<String>>,
+    /// For `aries-rfcs`: which RFCs are which protocols and documents
+    /// (`mappings/aries-rfcs.toml`).
+    pub manifest: Option<PathBuf>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
@@ -82,6 +85,8 @@ pub enum SourceKind {
     ProtocolRegistry,
     /// A checkout of decentralized-identity/didcomm-messaging (reads `specs.json`).
     DidcommSpec,
+    /// A checkout of hyperledger/aries-rfcs, read as `manifest` says.
+    AriesRfcs,
 }
 
 impl Config {

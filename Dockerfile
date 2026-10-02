@@ -39,6 +39,13 @@ RUN --mount=type=secret,id=github_token,required=false \
     fi; \
     cargo build --release --locked -j 2
 
+# The Aries RFCs without their images (~110 MB): only the Markdown and JSON the index
+# reads (~3 MB).
+FROM debian:bookworm-slim AS aries-rfcs
+COPY sources/aries-rfcs/features /aries-rfcs/features
+COPY sources/aries-rfcs/concepts /aries-rfcs/concepts
+RUN find /aries-rfcs -type f ! -name '*.md' ! -name '*.json' -delete && find /aries-rfcs -type d -empty -delete
+
 FROM debian:bookworm-slim
 # ca-certificates: did:web resolution and replies to HTTPS endpoints.
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates \
@@ -58,6 +65,7 @@ COPY sources/didcomm-messaging/specs.json sources/didcomm-messaging/specs.json
 COPY sources/didcomm-messaging/docs/spec-files sources/didcomm-messaging/docs/spec-files
 COPY sources/didcomm-messaging/docs/spec-files-v2.0-snapshot sources/didcomm-messaging/docs/spec-files-v2.0-snapshot
 COPY sources/didcomm-messaging/docs/spec-files-v2.1-snapshot sources/didcomm-messaging/docs/spec-files-v2.1-snapshot
+COPY --from=aries-rfcs /aries-rfcs sources/aries-rfcs
 # The identity lives in a volume so the server keeps its DID across container restarts.
 RUN mkdir -p data && chown docserver data
 VOLUME /app/data

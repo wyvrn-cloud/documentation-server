@@ -1,0 +1,283 @@
+# What the server reads from hyperledger/aries-rfcs (sources/aries-rfcs), which defines
+# most DIDComm v1 protocols. RFCs have no frontmatter naming their PIURI, so this file
+# does: one [[protocol]] per PIURI, and [[document]]s compiled from RFCs that define
+# conventions rather than protocols.
+#
+# A protocol replaces a didcomm.org page for the same PIURI that only links to the RFC
+# (one with no example messages); anywhere else, two sources defining one PIURI is a
+# warning. tests/index.rs fails if an RFC with example messages is neither used here
+# nor listed under [ignore], so new upstream RFCs can't slip past unnoticed.
+#
+# [[protocol]] keys:
+#   piuri       the PIURI the protocol is indexed under
+#   rfc         the RFC folder
+#   substitute  optional: replacements applied to example message types before they're
+#               grouped, for RFCs that write a placeholder (%VER, <baseuri>) or show
+#               one version's types while defining another. Examples are still served
+#               as written.
+#   aliases     optional: other PIURIs for the same protocol
+
+# --- Adopted / Accepted -----------------------------------------------------------
+
+[[protocol]]
+piuri = "https://didcomm.org/notification/1.0"
+rfc = "features/0015-acks"
+
+[[protocol]]
+piuri = "https://didcomm.org/didexchange/1.1"
+rfc = "features/0023-did-exchange"
+
+# The same RFC defines 1.0; 1.1 only added the optional goal/goal_code on request.
+[[protocol]]
+piuri = "https://didcomm.org/didexchange/1.0"
+rfc = "features/0023-did-exchange"
+substitute = { "https://didcomm.org/didexchange/1.1/" = "https://didcomm.org/didexchange/1.0/" }
+
+[[protocol]]
+piuri = "https://didcomm.org/discover-features/1.0"
+rfc = "features/0031-discover-features"
+
+[[protocol]]
+piuri = "https://didcomm.org/report-problem/1.0"
+rfc = "features/0035-report-problem"
+
+[[protocol]]
+piuri = "https://didcomm.org/issue-credential/1.0"
+rfc = "features/0036-issue-credential"
+
+# 1.1 added optional fields to propose-credential; the RFC defines both.
+[[protocol]]
+piuri = "https://didcomm.org/issue-credential/1.1"
+rfc = "features/0036-issue-credential"
+substitute = { "https://didcomm.org/issue-credential/1.0/" = "https://didcomm.org/issue-credential/1.1/" }
+
+[[protocol]]
+piuri = "https://didcomm.org/present-proof/1.0"
+rfc = "features/0037-present-proof"
+
+[[protocol]]
+piuri = "https://didcomm.org/trust_ping/1.0"
+rfc = "features/0048-trust-ping"
+aliases = ["https://didcomm.org/trust-ping/1.0"]
+
+[[protocol]]
+piuri = "https://didcomm.org/basicmessage/1.0"
+rfc = "features/0095-basic-message"
+
+[[protocol]]
+piuri = "https://didcomm.org/connections/1.0"
+rfc = "features/0160-connection-protocol"
+
+[[protocol]]
+piuri = "https://didcomm.org/revocation_notification/1.0"
+rfc = "features/0183-revocation-notification"
+
+[[protocol]]
+piuri = "https://didcomm.org/coordinate-mediation/1.0"
+rfc = "features/0211-route-coordination"
+substitute = { "<baseuri>" = "https://didcomm.org/coordinate-mediation/1.0" }
+
+[[protocol]]
+piuri = "https://didcomm.org/out-of-band/1.1"
+rfc = "features/0434-outofband"
+substitute = { "%VER" = "1.1" }
+
+[[protocol]]
+piuri = "https://didcomm.org/issue-credential/2.0"
+rfc = "features/0453-issue-credential-v2"
+substitute = { "%VER" = "2.0" }
+
+[[protocol]]
+piuri = "https://didcomm.org/present-proof/2.0"
+rfc = "features/0454-present-proof-v2"
+substitute = { "%VER" = "2.0" }
+
+[[protocol]]
+piuri = "https://didcomm.org/messagepickup/2.0"
+rfc = "features/0685-pickup-v2"
+
+# The RFC's examples say 2.1, but it defines 2.0, which is what implementations send.
+[[protocol]]
+piuri = "https://didcomm.org/revocation_notification/2.0"
+rfc = "features/0721-revocation-notification-v2"
+substitute = { "https://didcomm.org/revocation_notification/2.1/" = "https://didcomm.org/revocation_notification/2.0/" }
+
+[[protocol]]
+piuri = "https://didcomm.org/did-rotate/1.0"
+rfc = "features/0794-did-rotate"
+
+# --- Demonstrated -------------------------------------------------------------------
+
+[[protocol]]
+piuri = "https://didcomm.org/action-menu/1.0"
+rfc = "features/0509-action-menu"
+substitute = { "%VER" = "1.0" }
+
+[[protocol]]
+piuri = "https://didcomm.org/n-wise/1.0"
+rfc = "features/0748-n-wise-did-exchange"
+
+[[protocol]]
+piuri = "https://didcomm.org/drpc/1.0"
+rfc = "features/0804-didcomm-rpc"
+
+# --- Proposed -------------------------------------------------------------------------
+
+[[protocol]]
+piuri = "https://didcomm.org/introduce/1.0"
+rfc = "features/0028-introduce"
+
+[[protocol]]
+piuri = "https://didcomm.org/tracing/1.0"
+rfc = "features/0034-message-tracing"
+substitute = { "did:sov:BzCBs...;spec/1.0/" = "https://didcomm.org/tracing/1.0/" }
+
+[[protocol]]
+piuri = "https://didcomm.org/did_resolution/0.1"
+rfc = "features/0124-did-resolution-protocol"
+
+[[protocol]]
+piuri = "https://didcomm.org/messagepickup/1.0"
+rfc = "features/0212-pickup"
+
+[[protocol]]
+piuri = "https://didcomm.org/transferpolicy/1.0"
+rfc = "features/0213-transfer-policy"
+
+[[protocol]]
+piuri = "https://didcomm.org/help-me-discover/1.0"
+rfc = "features/0214-help-me-discover"
+
+[[protocol]]
+piuri = "https://didcomm.org/push-notifications-apns/1.0"
+rfc = "features/0699-push-notifications-apns"
+
+[[protocol]]
+piuri = "https://didcomm.org/push-notifications-fcm/1.0"
+rfc = "features/0734-push-notifications-fcm"
+
+[[protocol]]
+piuri = "https://didcomm.org/push-notifications-expo/1.0"
+rfc = "features/0745-push-notifications-expo"
+
+[[protocol]]
+piuri = "https://didcomm.org/vdrproxy/1.0"
+rfc = "features/0829-VDR-Proxy"
+
+[[protocol]]
+piuri = "https://didcomm.org/trust-input/1.0"
+rfc = "concepts/0781-trust-input-protocol"
+
+# --- Stalled / Retired (documented; no schemas) -----------------------------------------
+
+[[protocol]]
+piuri = "https://didcomm.org/sync-connection/1.0"
+rfc = "features/0030-sync-connection"
+
+[[protocol]]
+piuri = "https://didcomm.org/evidence_exchange/1.0"
+rfc = "features/0116-evidence-exchange"
+
+[[protocol]]
+piuri = "https://github.com/hyperledger/aries-rfcs/features/0193-coin-flip/1.0"
+rfc = "features/0193-coin-flip"
+
+[[protocol]]
+piuri = "https://didcomm.org/credential-issuance/0.1"
+rfc = "features/0303-v01-credential-exchange"
+
+[[protocol]]
+piuri = "https://didcomm.org/credential-presentation/0.1"
+rfc = "features/0303-v01-credential-exchange"
+
+[[protocol]]
+piuri = "https://didcomm.org/http-over-didcomm/1.0"
+rfc = "features/0335-http-over-didcomm"
+
+[[protocol]]
+piuri = "https://didcomm.org/coprotocol/1.0"
+rfc = "features/0482-coprotocol-protocol"
+
+# --- Documents ----------------------------------------------------------------------------
+
+# DIDComm v1 has no single specification; these RFCs are what defines it. Served as
+# version 1.0 of the "spec" document, in reading order. Section ids are prefixed with
+# the RFC number (rfc0008-..., and rfc0008 for the RFC as a whole).
+[[document]]
+id = "spec"
+version = "1.0"
+title = "DIDComm Messaging v1 (Aries RFCs)"
+didcomm_versions = ["^1.0"]
+rfcs = [
+  "concepts/0005-didcomm",
+  "concepts/0021-didcomm-message-anatomy",
+  "concepts/0020-message-types",
+  "features/0348-transition-msg-type-to-https",
+  "concepts/0003-protocols",
+  "concepts/0008-message-id-and-threading",
+  "concepts/0011-decorators",
+  "concepts/0017-attachments",
+  "features/0019-encryption-envelope",
+  "features/0587-encryption-envelope-v2",
+  "features/0044-didcomm-file-and-mime-types",
+  "features/0025-didcomm-transports",
+  "features/0092-transport-return-route",
+  "concepts/0046-mediators-and-relays",
+  "concepts/0094-cross-domain-messaging",
+  "features/0067-didcomm-diddoc-conventions",
+  "features/0360-use-did-key",
+  "features/0793-unqualfied-dids-transition",
+  "features/0056-service-decorator",
+  "features/0043-l10n",
+  "features/0032-message-timing",
+  "features/0015-acks",
+  "features/0035-report-problem",
+  "features/0034-message-tracing",
+  "features/0234-signature-decorator",
+  "features/0066-non-repudiable-cryptographic-envelope",
+  "concepts/0519-goal-codes",
+  "features/0496-transition-to-oob-and-did-exchange",
+  "concepts/0302-aries-interop-profile",
+  "concepts/0074-didcomm-best-practices",
+  "concepts/0047-json-ld-compatibility",
+  "concepts/0049-repudiation",
+]
+
+# The attachment formats issue-credential/2.0 and present-proof/2.0 carry credentials,
+# requests and proofs in.
+[[document]]
+id = "aries/attachment-formats"
+version = "current"
+title = "Aries Credential Attachment Formats"
+didcomm_versions = ["^1.0"]
+rfcs = [
+  "features/0592-indy-attachments",
+  "features/0771-anoncreds-attachments",
+  "features/0593-json-ld-cred-attach",
+  "features/0809-w3c-data-integrity-credential-attachment",
+  "features/0881-w3c-vc-sd-jwt-credential-attachment",
+  "features/0646-bbs-credentials",
+  "features/0510-dif-pres-exch-attach",
+  "features/0511-dif-cred-manifest-attach",
+  "features/0641-linking-binary-objects-to-credentials",
+  "features/0728-device-binding-attachments",
+  "features/0780-data-urls-images",
+]
+
+# RFCs with example messages that are deliberately not indexed, with why.
+[ignore]
+rfcs = [
+  # Defined on didcomm.org with both v1 and v2 examples; that page is indexed.
+  "features/0113-question-answer",
+  "features/0557-discover-features-v2",
+  # Extensions of present-proof/1.0 and issue-credential/1.0, not protocols of their own.
+  "features/0347-proof-negotiation",
+  "features/0075-payment-decorators",
+  # Examples of other protocols' messages; no protocol of their own.
+  "features/0351-purpose-decorator",
+  "features/0281-rich-schemas",
+  "features/0327-crypto-service",
+  "concepts/0346-didcomm-between-two-mobile-agents",
+  "concepts/0700-oob-through-redirect",
+  "concepts/0812-compression-dictionary",
+]
