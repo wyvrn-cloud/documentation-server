@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "questionanswer/1.0/answer",
+  "description": "Answers a question with one of its valid responses; response_sig is required when the question set signature_required.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "thid",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/questionanswer/1.0/answer"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "response": {
+          "type": "string"
+        },
+        "response_sig": {
+          "type": "object",
+          "description": "A signature (ed25519Sha512_single) over HASH(question_text + response + nonce).",
+          "required": [
+            "signature",
+            "sig_data"
+          ],
+          "properties": {
+            "signature": {
+              "type": "string"
+            },
+            "sig_data": {
+              "type": "string"
+            },
+            "signers": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "signer": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "required": [
+        "response"
+      ]
+    }
+  }
+}

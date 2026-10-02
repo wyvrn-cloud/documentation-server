@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "message-pickup/4.0/delivery-request",
+  "description": "Asks the mediator to deliver up to message_count_limit messages; with none queued it answers with an empty delivery. return_route MUST be all.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "body",
+    "return_route"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/message-pickup/4.0/delivery-request"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "message_count_limit": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "recipient_did": {
+          "type": "string",
+          "pattern": "^did:[a-z0-9]+:[^#]+$",
+          "description": "Only for this recipient DID."
+        }
+      },
+      "required": [
+        "message_count_limit"
+      ]
+    },
+    "return_route": {
+      "const": "all",
+      "description": "return_route extension: replies come back on this connection."
+    }
+  }
+}

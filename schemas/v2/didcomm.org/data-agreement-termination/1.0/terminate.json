@@ -1,0 +1,218 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "data-agreement-termination/1.0/terminate",
+  "description": "The data subject terminates a Data Agreement: its id, the terminate event and a proof. These pages mix DIDComm v1 conventions into v2 messages (~thread instead of thid, fields outside body); the schema accepts what they show.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "body"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/data-agreement-termination/1.0/terminate"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "event": {
+          "$ref": "#/$defs/event"
+        },
+        "proof": {
+          "$ref": "#/$defs/proof"
+        }
+      },
+      "required": [
+        "id",
+        "event"
+      ]
+    }
+  },
+  "$defs": {
+    "event": {
+      "type": "object",
+      "required": [
+        "time_stamp",
+        "did",
+        "state"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "time_stamp": {
+          "type": "string"
+        },
+        "did": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string",
+          "description": "offer, accept, reject, terminate, ..."
+        }
+      }
+    },
+    "proof": {
+      "type": "object",
+      "description": "A Linked Data Proof (e.g. Ed25519Signature2018, proofPurpose contractAgreement).",
+      "required": [
+        "type",
+        "verificationMethod",
+        "proofValue"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "created": {
+          "type": "string"
+        },
+        "verificationMethod": {
+          "type": "string"
+        },
+        "proofPurpose": {
+          "type": "string"
+        },
+        "proofValue": {
+          "type": "string"
+        }
+      }
+    },
+    "data_agreement": {
+      "type": "object",
+      "description": "A Data Agreement (JSON-LD, Automated Data Agreements schema), signed by its proof chain.",
+      "required": [
+        "id",
+        "purpose",
+        "personal_data"
+      ],
+      "properties": {
+        "@context": {},
+        "id": {
+          "type": "string"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "template_id": {
+          "type": "string"
+        },
+        "template_version": {
+          "type": "integer"
+        },
+        "data_controller_name": {
+          "type": "string"
+        },
+        "data_controller_url": {
+          "type": "string"
+        },
+        "purpose": {
+          "type": "string"
+        },
+        "purpose_description": {
+          "type": "string"
+        },
+        "lawful_basis": {
+          "type": "string",
+          "description": "e.g. consent, contract, legal_obligation, vital_interest, public_task, legitimate_interest."
+        },
+        "method_of_use": {
+          "type": "string",
+          "description": "data-source or data-using-service."
+        },
+        "data_policy": {
+          "type": "object"
+        },
+        "personal_data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "attribute_name"
+            ],
+            "properties": {
+              "attribute_id": {
+                "type": "string"
+              },
+              "attribute_name": {
+                "type": "string"
+              },
+              "attribute_sensitive": {
+                "type": "boolean"
+              },
+              "attribute_category": {
+                "type": "string"
+              },
+              "attribute_description": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "dpia": {
+          "type": "object"
+        },
+        "event": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/event"
+          }
+        },
+        "proof": {
+          "$ref": "#/$defs/proof"
+        },
+        "proofChain": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/proof"
+          }
+        },
+        "data_subject_did": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

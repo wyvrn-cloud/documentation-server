@@ -1,0 +1,84 @@
+{
+  "attachment": {
+    "type": "object",
+    "required": [
+      "data"
+    ],
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9._~-]+$"
+      },
+      "description": {
+        "type": "string"
+      },
+      "filename": {
+        "type": "string"
+      },
+      "media_type": {
+        "type": "string"
+      },
+      "format": {
+        "type": "string"
+      },
+      "lastmod_time": {
+        "type": [
+          "integer",
+          "string"
+        ]
+      },
+      "byte_count": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "data": {
+        "type": "object",
+        "anyOf": [
+          {
+            "required": [
+              "jws"
+            ]
+          },
+          {
+            "required": [
+              "hash"
+            ]
+          },
+          {
+            "required": [
+              "links"
+            ]
+          },
+          {
+            "required": [
+              "base64"
+            ]
+          },
+          {
+            "required": [
+              "json"
+            ]
+          }
+        ],
+        "properties": {
+          "jws": {
+            "type": "object"
+          },
+          "hash": {
+            "type": "string"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "base64": {
+            "type": "string"
+          },
+          "json": {}
+        }
+      }
+    }
+  }
+}

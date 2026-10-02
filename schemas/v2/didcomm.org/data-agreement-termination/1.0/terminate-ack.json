@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "data-agreement-termination/1.0/terminate-ack",
+  "description": "The organisation confirms the data is no longer bound by the agreement. These pages mix DIDComm v1 conventions into v2 messages (~thread instead of thid, fields outside body); the schema accepts what they show.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "status"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender."
+    },
+    "type": {
+      "const": "https://didcomm.org/data-agreement-termination/1.0/terminate-ack"
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^did:[a-z0-9]+:[^#]+$",
+      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:[a-z0-9]+:[^#]+$"
+      },
+      "description": "Intended recipient DIDs."
+    },
+    "thid": {
+      "type": "string",
+      "description": "Thread id; the id of the message that started the thread."
+    },
+    "pthid": {
+      "type": "string",
+      "description": "Parent thread id."
+    },
+    "created_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "expires_time": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "UTC epoch seconds."
+    },
+    "body": {
+      "type": "object",
+      "properties": {}
+    },
+    "status": {
+      "enum": [
+        "OK",
+        "PENDING"
+      ]
+    },
+    "~thread": {
+      "type": "object",
+      "required": [
+        "thid"
+      ],
+      "properties": {
+        "thid": {
+          "type": "string"
+        }
+      },
+      "description": "The pages use ~thread for the thread id; thid is the DIDComm v2 header."
+    }
+  },
+  "anyOf": [
+    {
+      "required": [
+        "thid"
+      ]
+    },
+    {
+      "required": [
+        "~thread"
+      ]
+    }
+  ]
+}
