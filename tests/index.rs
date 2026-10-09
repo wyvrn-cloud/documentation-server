@@ -129,6 +129,21 @@ fn core_protocols_have_their_schemas() {
     assert_eq!(mediation.didcomm_versions(), ["^2.0"]);
 }
 
+/// workflow/1.0 is defined for DIDComm v2, but its implementations (Credo, the Bifold
+/// wallet) speak DIDComm v1, so every message has a schema for each.
+#[test]
+fn workflow_has_schemas_for_both_envelope_styles() {
+    let index = index();
+    let workflow = &index.protocols["https://didcomm.org/workflow/1.0"];
+    assert_eq!(workflow.didcomm_versions(), ["^1.0", "^2.0"]);
+    let with_both = workflow
+        .messages
+        .iter()
+        .filter(|m| m.schema_for(Envelope::V1).is_some() && m.schema_for(Envelope::V2).is_some())
+        .count();
+    assert_eq!(with_both, 13);
+}
+
 /// Every schema compiles. Upstream examples are checked against them and mismatches
 /// reported, not failed: examples legitimately use placeholders and skip required
 /// headers (see schemas/README.md).

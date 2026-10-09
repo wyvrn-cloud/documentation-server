@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "workflow/1.0/workflows",
-  "description": "The templates (ids, versions, titles) the requester may see.",
+  "description": "The templates the requester may see, one entry per template id. (didcomm.org workflow/1.0)",
   "type": "object",
   "required": [
     "id",
     "type",
-    "thid",
-    "body"
+    "body",
+    "thid"
   ],
   "properties": {
     "id": {
@@ -51,6 +51,9 @@
     },
     "body": {
       "type": "object",
+      "required": [
+        "workflows"
+      ],
       "properties": {
         "workflows": {
           "type": "array",
@@ -74,7 +77,8 @@
                 "type": "string"
               },
               "hash": {
-                "type": "string"
+                "type": "string",
+                "description": "When include_hash and a single version."
               }
             }
           }
@@ -92,10 +96,7 @@
             }
           }
         }
-      },
-      "required": [
-        "workflows"
-      ]
+      }
     }
   }
 }

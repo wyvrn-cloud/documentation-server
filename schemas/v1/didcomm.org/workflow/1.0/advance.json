@@ -1,0 +1,226 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "workflow/1.0/advance",
+  "description": "Fires an event on an instance: guard, optional action, persisted state, and complete on reaching a final state. Idempotent per idempotency_key. Answered with a status or a problem-report. DIDComm v1 as sent by @ajna-inc/workflow (Credo 0.5): the fields sit under body, ~thread.thid carries the thread id, and requests set ~transport.return_route to thread.",
+  "type": "object",
+  "required": [
+    "@id",
+    "@type",
+    "body",
+    "~thread"
+  ],
+  "properties": {
+    "@id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Message ID, unique to the sender (Aries RFC 0008)."
+    },
+    "@type": {
+      "enum": [
+        "https://didcomm.org/workflow/1.0/advance",
+        "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/workflow/1.0/advance"
+      ],
+      "description": "The did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/ form is the legacy equivalent (Aries RFC 0348)."
+    },
+    "~thread": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/thread"
+        },
+        {
+          "required": [
+            "thid"
+          ]
+        }
+      ]
+    },
+    "~l10n": {
+      "$ref": "#/$defs/l10n"
+    },
+    "~timing": {
+      "$ref": "#/$defs/timing"
+    },
+    "~transport": {
+      "$ref": "#/$defs/transport"
+    },
+    "~please_ack": {
+      "$ref": "#/$defs/please_ack"
+    },
+    "~service": {
+      "$ref": "#/$defs/service"
+    },
+    "~trace": {
+      "$ref": "#/$defs/trace"
+    },
+    "body": {
+      "type": "object",
+      "required": [
+        "instance_id",
+        "event"
+      ],
+      "properties": {
+        "instance_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The workflow instance's id. The thread id MUST equal it."
+        },
+        "event": {
+          "type": "string",
+          "description": "A transitions[].on of the current state."
+        },
+        "idempotency_key": {
+          "type": "string"
+        },
+        "input": {
+          "type": "object",
+          "description": "Form values by form-id; for state:set@1 actions, merged into context."
+        },
+        "$transient": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "input fields used for this advance only, never stored."
+        }
+      }
+    }
+  },
+  "$defs": {
+    "thread": {
+      "type": "object",
+      "description": "~thread decorator (Aries RFC 0008). thid: the @id of the message that started the thread; pthid: the parent thread's id.",
+      "properties": {
+        "thid": {
+          "type": "string"
+        },
+        "pthid": {
+          "type": "string"
+        },
+        "sender_order": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "received_orders": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "goal_code": {
+          "type": "string"
+        }
+      }
+    },
+    "l10n": {
+      "type": "object",
+      "description": "~l10n decorator (Aries RFC 0043): the message's locale (locale), or, for advanced cases, locales, catalogs and per-field localization.",
+      "properties": {
+        "locale": {
+          "type": "string"
+        },
+        "locales": {
+          "type": "object"
+        },
+        "catalogs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "timing": {
+      "type": "object",
+      "description": "~timing decorator (Aries RFC 0032). Times are ISO 8601 UTC.",
+      "properties": {
+        "in_time": {
+          "type": "string"
+        },
+        "out_time": {
+          "type": "string"
+        },
+        "stale_time": {
+          "type": "string"
+        },
+        "expires_time": {
+          "type": "string"
+        },
+        "delay_milli": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "wait_until_time": {
+          "type": "string"
+        }
+      }
+    },
+    "transport": {
+      "type": "object",
+      "description": "~transport decorator (Aries RFC 0092): return_route asks for replies on the same connection.",
+      "properties": {
+        "return_route": {
+          "enum": [
+            "none",
+            "all",
+            "thread"
+          ]
+        },
+        "return_route_thread": {
+          "type": "string"
+        }
+      }
+    },
+    "please_ack": {
+      "type": "object",
+      "description": "~please_ack decorator (retired Aries RFC 0317): asks for an ack on receipt and/or outcome.",
+      "properties": {
+        "on": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "RECEIPT",
+              "OUTCOME"
+            ]
+          }
+        }
+      }
+    },
+    "service": {
+      "type": "object",
+      "description": "~service decorator (Aries RFC 0056): where to send a reply when there is no connection.",
+      "properties": {
+        "recipientKeys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "routingKeys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "serviceEndpoint": {
+          "type": "string"
+        }
+      }
+    },
+    "trace": {
+      "type": "object",
+      "description": "~trace decorator (Aries RFC 0034).",
+      "properties": {
+        "target": {
+          "type": "string"
+        },
+        "full_thread": {
+          "type": "boolean"
+        },
+        "trace_reports": {
+          "type": "array"
+        }
+      }
+    }
+  }
+}

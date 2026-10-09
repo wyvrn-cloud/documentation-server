@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "workflow/1.0/problem-report",
-  "description": "A problem report (DIDComm Messaging spec, Problem Reports), adopted into this protocol. pthid is the thid of the thread where the problem occurred. Codes include template_not_found, template_invalid, instance_not_found, guard_failed, action_failed, not_authorized, multiplicity_violation, vault_unavailable, vault_ref_invalid, sensitivity_violation.",
+  "description": "Reports a failure on the thread of the message that caused it. Codes in the definition: template_not_found, template_invalid, instance_not_found, guard_failed, action_failed, discovery_failed, not_authorized, not_found_remote_template, multiplicity_violation, vault_unavailable, vault_ref_invalid, sensitivity_violation. @ajna-inc/workflow also sends invalid_template, invalid_event (including an unknown instance), forbidden (connection mismatch, paused or canceled instance), already_exists (singleton policy), idempotency_conflict, state_conflict, action_error, missing_attributes and temporary_unavailable. (didcomm.org workflow/1.0)",
   "type": "object",
   "required": [
     "id",
     "type",
-    "pthid",
-    "body"
+    "body",
+    "thid"
   ],
   "properties": {
     "id": {
@@ -49,13 +49,6 @@
       "minimum": 0,
       "description": "UTC epoch seconds."
     },
-    "ack": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "description": "Ids of the message(s) that triggered the problem."
-    },
     "body": {
       "type": "object",
       "required": [
@@ -63,22 +56,14 @@
       ],
       "properties": {
         "code": {
-          "type": "string",
-          "pattern": "^[ew]\\.[a-z0-9-]+(\\.[a-z0-9-]+)*$",
-          "description": "Problem code: sorter (e = error, w = warning), scope (p = protocol, m = message, or a state name), then descriptors, dot-separated, lower kebab-case. E.g. e.p.xfer.cant-use-endpoint."
+          "type": "string"
         },
         "comment": {
-          "type": "string",
-          "description": "Human-friendly text statically associated with code; {1}, {2}, ... interpolate args."
+          "type": "string"
         },
         "args": {
-          "type": "array",
-          "description": "Situation-specific values interpolated into comment."
-        },
-        "escalate_to": {
-          "type": "string",
-          "format": "uri",
-          "description": "Where to get further help."
+          "type": "object",
+          "description": "e.g. {\"subcode\": \"queue_unavailable\"}."
         }
       }
     }

@@ -1,12 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "workflow/1.0/complete",
-  "description": "The processor reports that the instance reached a final state.",
+  "description": "Sent by the processor when the instance enters a final state. (didcomm.org workflow/1.0)",
   "type": "object",
   "required": [
     "id",
     "type",
-    "body"
+    "body",
+    "thid"
   ],
   "properties": {
     "id": {
@@ -50,18 +51,20 @@
     },
     "body": {
       "type": "object",
+      "required": [
+        "instance_id"
+      ],
       "properties": {
         "instance_id": {
           "type": "string",
-          "description": "The workflow instance's id (thid SHOULD equal it)."
+          "minLength": 1,
+          "description": "The workflow instance's id. The thread id MUST equal it."
         },
         "reason": {
-          "type": "string"
+          "type": "string",
+          "description": "e.g. state_final."
         }
-      },
-      "required": [
-        "instance_id"
-      ]
+      }
     }
   }
 }

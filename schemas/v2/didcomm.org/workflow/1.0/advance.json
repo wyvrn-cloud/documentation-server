@@ -1,12 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "workflow/1.0/advance",
-  "description": "Fires an event on an instance: guard, optional action, persisted state. Idempotent per idempotency_key; fields named in $transient are used for this cycle only.",
+  "description": "Fires an event on an instance: guard, optional action, persisted state, and complete on reaching a final state. Idempotent per idempotency_key. Answered with a status or a problem-report. (didcomm.org workflow/1.0)",
   "type": "object",
   "required": [
     "id",
     "type",
-    "body"
+    "body",
+    "thid"
   ],
   "properties": {
     "id": {
@@ -50,31 +51,35 @@
     },
     "body": {
       "type": "object",
+      "required": [
+        "instance_id",
+        "event"
+      ],
       "properties": {
         "instance_id": {
           "type": "string",
-          "description": "The workflow instance's id (thid SHOULD equal it)."
+          "minLength": 1,
+          "description": "The workflow instance's id. The thread id MUST equal it."
         },
         "event": {
-          "type": "string"
+          "type": "string",
+          "description": "A transitions[].on of the current state."
         },
         "idempotency_key": {
           "type": "string"
         },
         "input": {
-          "type": "object"
+          "type": "object",
+          "description": "Form values by form-id; for state:set@1 actions, merged into context."
         },
         "$transient": {
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "description": "input fields used for this advance only, never stored."
         }
-      },
-      "required": [
-        "instance_id",
-        "event"
-      ]
+      }
     }
   }
 }

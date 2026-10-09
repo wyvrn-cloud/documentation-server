@@ -1,11 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "workflow/1.0/discover",
-  "description": "Asks for the templates the requester may see; answered with workflows on the same thread.",
+  "description": "Asks for the templates the requester may see; answered with workflows on the same thread. (didcomm.org workflow/1.0)",
   "type": "object",
   "required": [
     "id",
-    "type"
+    "type",
+    "body"
   ],
   "properties": {
     "id": {

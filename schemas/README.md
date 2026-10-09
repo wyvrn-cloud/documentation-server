@@ -115,7 +115,7 @@ defines a decorator, not messages.
 | `signing/1.0` | v2 | propose/request signing, consent, partial-signature, combine, provide-artifacts, issue-token, `ack`, decline, `problem-report` |
 | `payments/1.0` | v2 | query-methods, methods, compliance, handshake, receipt, confirm, cancel, method update/revoke, the mandates profile, `problem-report` |
 | `rooms/1.0` | v2 | create, invite, join, welcome, commit, leave, roster, msg, moderate, route advertise/ack, `problem-report` |
-| `workflow/1.0` | v2 | publish-template, start, advance, status, pause/resume/cancel/complete, discover, workflows, fetch-template, template, `problem-report` |
+| `workflow/1.0` | v2 + v1 | publish-template, start, advance, status, pause/resume/cancel/complete, discover, workflows, fetch-template, template, `problem-report` |
 | `n-wise/1.0` | v1 | `invitation`, `ledger-update-notify` |
 | `drpc/1.0` | v1 | `request`, `response` (JSON-RPC), `problem-report` |
 
@@ -185,3 +185,24 @@ the examples: descriptive placeholders where base64url values go (`"<8 bytes,
 base64url>"`, `"BASE64URL(32-bytes)"`), `%VER` in the WACI examples, replies without
 `thid` / `~thread` or `@id`, ledger's `{"...": "entry at seq 9"}` stand-ins, and a key id
 in `from` where DIDComm v2 wants a DID.
+
+## Validation notes, workflow/1.0 (2026-10-09)
+
+The workflow schemas follow the one public implementation,
+[`@ajna-inc/workflow`](https://www.npmjs.com/package/@ajna-inc/workflow) 0.5.39 (Credo), which
+the Bifold wallet uses, where it differs from the didcomm.org page:
+
+- **DIDComm v1 as well as v2.** Credo 0.5 speaks DIDComm v1, with the message's fields under
+  `body`, the instance id in `~thread.thid` and `~transport.return_route: "thread"` on
+  requests. `v1/` has a schema per message in that shape.
+- **The template shape.** didcomm.org's example has `id`, `name`, and `states`,
+  `transitions` and `actions` as maps. The implementation requires `template_id`, `title`,
+  `instance_policy`, `catalog`, and arrays: states with a `type` (`start`, `normal`,
+  `final`; one `start` required), transitions with an `on` event, actions with a `key`.
+  `profile_ref` is `cp.<credential profile>` or `pp.<proof profile>`. The schemas follow the
+  implementation, so the page's example doesn't validate.
+- **`status`.** `action_menu` is an array of `{label, event}`, not a map. A status that
+  answers carries `state` (`pending` while a start is queued) and needs `thid`.
+- **`problem-report`.** Workflow's own: `{code, comment, args}` with codes like
+  `template_not_found` or `invalid_event`, on the failing message's thread (`thid`), not the
+  spec's dotted codes under `pthid`.

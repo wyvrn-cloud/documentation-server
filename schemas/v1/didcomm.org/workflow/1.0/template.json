@@ -1,52 +1,56 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "workflow/1.0/publish-template",
-  "description": "Installs or updates a workflow template at the processor, which validates it and stores a SHA-256 hash of its key-sorted JSON. No reply on success. (didcomm.org workflow/1.0)",
+  "title": "workflow/1.0/template",
+  "description": "The full, authoritative template, on the fetch-template's thread; the recipient validates and stores it, then proceeds with any pending start. DIDComm v1 as sent by @ajna-inc/workflow (Credo 0.5): the fields sit under body, ~thread.thid carries the thread id, and requests set ~transport.return_route to thread.",
   "type": "object",
   "required": [
-    "id",
-    "type",
-    "body"
+    "@id",
+    "@type",
+    "body",
+    "~thread"
   ],
   "properties": {
-    "id": {
+    "@id": {
       "type": "string",
       "minLength": 1,
-      "description": "Message ID, unique to the sender."
+      "description": "Message ID, unique to the sender (Aries RFC 0008)."
     },
-    "type": {
-      "const": "https://didcomm.org/workflow/1.0/publish-template"
+    "@type": {
+      "enum": [
+        "https://didcomm.org/workflow/1.0/template",
+        "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/workflow/1.0/template"
+      ],
+      "description": "The did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/ form is the legacy equivalent (Aries RFC 0348)."
     },
-    "from": {
-      "type": "string",
-      "pattern": "^did:[a-z0-9]+:[^#]+$",
-      "description": "Sender DID. REQUIRED when the message is authcrypted."
+    "~thread": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/thread"
+        },
+        {
+          "required": [
+            "thid"
+          ]
+        }
+      ]
     },
-    "to": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "pattern": "^did:[a-z0-9]+:[^#]+$"
-      },
-      "description": "Intended recipient DIDs."
+    "~l10n": {
+      "$ref": "#/$defs/l10n"
     },
-    "thid": {
-      "type": "string",
-      "description": "Thread id; the id of the message that started the thread."
+    "~timing": {
+      "$ref": "#/$defs/timing"
     },
-    "pthid": {
-      "type": "string",
-      "description": "Parent thread id."
+    "~transport": {
+      "$ref": "#/$defs/transport"
     },
-    "created_time": {
-      "type": "integer",
-      "minimum": 0,
-      "description": "UTC epoch seconds."
+    "~please_ack": {
+      "$ref": "#/$defs/please_ack"
     },
-    "expires_time": {
-      "type": "integer",
-      "minimum": 0,
-      "description": "UTC epoch seconds."
+    "~service": {
+      "$ref": "#/$defs/service"
+    },
+    "~trace": {
+      "$ref": "#/$defs/trace"
     },
     "body": {
       "type": "object",
@@ -56,15 +60,147 @@
       "properties": {
         "template": {
           "$ref": "#/$defs/workflow_template"
-        },
-        "mode": {
-          "type": "string",
-          "description": "e.g. upsert (the only behavior implemented)."
         }
       }
     }
   },
   "$defs": {
+    "thread": {
+      "type": "object",
+      "description": "~thread decorator (Aries RFC 0008). thid: the @id of the message that started the thread; pthid: the parent thread's id.",
+      "properties": {
+        "thid": {
+          "type": "string"
+        },
+        "pthid": {
+          "type": "string"
+        },
+        "sender_order": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "received_orders": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "goal_code": {
+          "type": "string"
+        }
+      }
+    },
+    "l10n": {
+      "type": "object",
+      "description": "~l10n decorator (Aries RFC 0043): the message's locale (locale), or, for advanced cases, locales, catalogs and per-field localization.",
+      "properties": {
+        "locale": {
+          "type": "string"
+        },
+        "locales": {
+          "type": "object"
+        },
+        "catalogs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "timing": {
+      "type": "object",
+      "description": "~timing decorator (Aries RFC 0032). Times are ISO 8601 UTC.",
+      "properties": {
+        "in_time": {
+          "type": "string"
+        },
+        "out_time": {
+          "type": "string"
+        },
+        "stale_time": {
+          "type": "string"
+        },
+        "expires_time": {
+          "type": "string"
+        },
+        "delay_milli": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "wait_until_time": {
+          "type": "string"
+        }
+      }
+    },
+    "transport": {
+      "type": "object",
+      "description": "~transport decorator (Aries RFC 0092): return_route asks for replies on the same connection.",
+      "properties": {
+        "return_route": {
+          "enum": [
+            "none",
+            "all",
+            "thread"
+          ]
+        },
+        "return_route_thread": {
+          "type": "string"
+        }
+      }
+    },
+    "please_ack": {
+      "type": "object",
+      "description": "~please_ack decorator (retired Aries RFC 0317): asks for an ack on receipt and/or outcome.",
+      "properties": {
+        "on": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "RECEIPT",
+              "OUTCOME"
+            ]
+          }
+        }
+      }
+    },
+    "service": {
+      "type": "object",
+      "description": "~service decorator (Aries RFC 0056): where to send a reply when there is no connection.",
+      "properties": {
+        "recipientKeys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "routingKeys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "serviceEndpoint": {
+          "type": "string"
+        }
+      }
+    },
+    "trace": {
+      "type": "object",
+      "description": "~trace decorator (Aries RFC 0034).",
+      "properties": {
+        "target": {
+          "type": "string"
+        },
+        "full_thread": {
+          "type": "boolean"
+        },
+        "trace_reports": {
+          "type": "array"
+        }
+      }
+    },
     "workflow_template": {
       "type": "object",
       "description": "A workflow template: a versioned state machine (states, transitions with JMESPath guards and actions), the catalog of credential and proof profiles its actions use, and its UI. Shape as implemented by @ajna-inc/workflow (Credo); it rejects keys outside these at the top level, sensitivity included.",

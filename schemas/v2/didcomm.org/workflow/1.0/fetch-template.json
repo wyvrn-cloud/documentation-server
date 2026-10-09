@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "workflow/1.0/fetch-template",
-  "description": "Asks for a full template (latest version when template_version is omitted).",
+  "description": "Asks for a full template (latest version when template_version is omitted). Answered with template, or problem-report not_found_remote_template (also on a prefer_hash mismatch). (didcomm.org workflow/1.0)",
   "type": "object",
   "required": [
     "id",
@@ -50,6 +50,9 @@
     },
     "body": {
       "type": "object",
+      "required": [
+        "template_id"
+      ],
       "properties": {
         "template_id": {
           "type": "string"
@@ -60,10 +63,7 @@
         "prefer_hash": {
           "type": "string"
         }
-      },
-      "required": [
-        "template_id"
-      ]
+      }
     }
   }
 }

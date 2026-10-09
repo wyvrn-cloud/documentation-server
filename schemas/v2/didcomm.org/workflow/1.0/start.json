@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "workflow/1.0/start",
-  "description": "Starts a workflow instance from a template, bound to the connection it arrives on (connection_id MUST NOT be sent). Context values can be vault references ({\"$ref\": {vault_id, doc_id, digest}}).",
+  "description": "Starts a workflow instance from a template, bound to the connection it arrives on. The thread id is the instance id. Answered with a status (state pending while queued), or a problem-report; an unknown template makes the processor send fetch-template on the same thread first. (didcomm.org workflow/1.0)",
   "type": "object",
   "required": [
     "id",
@@ -50,30 +50,33 @@
     },
     "body": {
       "type": "object",
+      "required": [
+        "template_id"
+      ],
       "properties": {
         "template_id": {
           "type": "string"
         },
         "template_version": {
-          "type": "string"
+          "type": "string",
+          "description": "Latest when omitted."
         },
         "instance_id": {
           "type": "string",
-          "description": "The workflow instance's id (thid SHOULD equal it)."
+          "minLength": 1,
+          "description": "The workflow instance's id. The thread id MUST equal it."
         },
         "participants": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "object",
-            "properties": {
-              "did": {
-                "type": "string"
-              }
-            }
-          }
+          "$ref": "#/$defs/participants"
         },
         "context": {
-          "type": "object"
+          "type": "object",
+          "description": "Initial context. A vault-backed field is a {\"$ref\": {vault_id, doc_id, digest}} pointer.",
+          "additionalProperties": {}
+        },
+        "connection_id": {
+          "type": "string",
+          "description": "Ignored: the processor binds the instance to the inbound connection. The definition says not to send it; @ajna-inc/workflow does."
         },
         "vault_ref": {
           "type": "object",
@@ -94,15 +97,27 @@
           "default": true
         },
         "template_hash": {
-          "type": "string"
+          "type": "string",
+          "description": "Integrity hint; sent as prefer_hash in a resulting fetch-template."
         },
         "multiplicity_hint": {
           "type": "string"
         }
-      },
-      "required": [
-        "template_id"
-      ]
+      }
+    }
+  },
+  "$defs": {
+    "participants": {
+      "type": "object",
+      "description": "Participants by role key (issuer, holder, ...). The processor fills issuer and holder from the connection when missing.",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "did": {
+            "type": "string"
+          }
+        }
+      }
     }
   }
 }

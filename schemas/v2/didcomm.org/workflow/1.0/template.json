@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "workflow/1.0/template",
-  "description": "The full, authoritative template; the processor validates and stores it before a pending start.",
+  "description": "The full, authoritative template, on the fetch-template's thread; the recipient validates and stores it, then proceeds with any pending start. (didcomm.org workflow/1.0)",
   "type": "object",
   "required": [
     "id",
     "type",
-    "thid",
-    "body"
+    "body",
+    "thid"
   ],
   "properties": {
     "id": {
@@ -51,94 +51,519 @@
     },
     "body": {
       "type": "object",
+      "required": [
+        "template"
+      ],
       "properties": {
         "template": {
+          "$ref": "#/$defs/workflow_template"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "workflow_template": {
+      "type": "object",
+      "description": "A workflow template: a versioned state machine (states, transitions with JMESPath guards and actions), the catalog of credential and proof profiles its actions use, and its UI. Shape as implemented by @ajna-inc/workflow (Credo); it rejects keys outside these at the top level, sensitivity included.",
+      "required": [
+        "template_id",
+        "version",
+        "title",
+        "instance_policy",
+        "states",
+        "transitions",
+        "catalog",
+        "actions"
+      ],
+      "properties": {
+        "template_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Semver."
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "instance_policy": {
           "type": "object",
-          "description": "A workflow template: an authoritative state machine (states, transitions with guards and actions) and its catalog.",
           "required": [
-            "id",
-            "version",
-            "states",
-            "transitions"
+            "mode"
           ],
           "properties": {
-            "id": {
-              "type": "string"
+            "mode": {
+              "enum": [
+                "singleton_per_connection",
+                "multi_per_connection"
+              ]
             },
-            "version": {
-              "type": "string"
-            },
-            "name": {
-              "type": "string"
-            },
-            "states": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object",
-                "properties": {
-                  "final": {
-                    "type": "boolean"
-                  }
-                }
+            "multiplicity_key": {
+              "type": "string",
+              "description": "JMESPath over {context} that deduplicates instances in multi_per_connection mode."
+            }
+          }
+        },
+        "sections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "order": {
+                "type": "number"
+              },
+              "icon": {
+                "type": "string"
               }
-            },
-            "transitions": {
+            }
+          }
+        },
+        "states": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Exactly the states of the machine; one of type start is required.",
+          "contains": {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "start"
+              }
+            }
+          },
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "type"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "start",
+                  "normal",
+                  "final"
+                ]
+              },
+              "section": {
+                "type": "string",
+                "description": "A sections[].name."
+              }
+            }
+          }
+        },
+        "transitions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "from",
+              "to",
+              "on"
+            ],
+            "properties": {
+              "from": {
+                "type": "string"
+              },
+              "to": {
+                "type": "string"
+              },
+              "on": {
+                "type": "string",
+                "description": "The event name advance sends."
+              },
+              "guard": {
+                "type": "string",
+                "description": "JMESPath over {context, participants, artifacts}; the transition is enabled when truthy."
+              },
+              "action": {
+                "type": "string",
+                "description": "An actions[].key."
+              }
+            }
+          }
+        },
+        "catalog": {
+          "type": "object",
+          "properties": {
+            "credential_profiles": {
               "type": "object",
+              "description": "Referenced from actions as cp.<key>.",
               "additionalProperties": {
                 "type": "object",
                 "required": [
-                  "from",
-                  "to"
+                  "cred_def_id",
+                  "attribute_plan",
+                  "to_ref"
                 ],
                 "properties": {
-                  "from": {
+                  "cred_def_id": {
                     "type": "string"
                   },
-                  "to": {
-                    "type": "string"
+                  "attribute_plan": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "$ref": "#/$defs/attribute_spec"
+                    }
                   },
-                  "guard": {},
-                  "action": {
-                    "type": [
-                      "string",
-                      "null"
-                    ]
+                  "to_ref": {
+                    "type": "string",
+                    "description": "The participant key (e.g. holder) the credential goes to."
+                  },
+                  "options": {
+                    "type": "object",
+                    "description": "e.g. comment."
                   }
                 }
               }
             },
-            "actions": {
+            "proof_profiles": {
               "type": "object",
+              "description": "Referenced from actions as pp.<key>.",
               "additionalProperties": {
                 "type": "object",
+                "required": [
+                  "to_ref"
+                ],
                 "properties": {
-                  "typeURI": {
+                  "schema_id": {
                     "type": "string"
                   },
-                  "profile_ref": {
+                  "cred_def_id": {
                     "type": "string"
+                  },
+                  "requested_attributes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "requested_predicates": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "name",
+                        "p_type",
+                        "p_value"
+                      ],
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "p_type": {
+                          "type": "string"
+                        },
+                        "p_value": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  },
+                  "to_ref": {
+                    "type": "string"
+                  },
+                  "options": {
+                    "type": "object"
                   }
                 }
               }
             },
-            "catalog": {
-              "type": "object"
-            },
-            "display_hints": {
-              "type": "object"
-            },
-            "sensitivity": {
-              "type": "object"
-            },
-            "instance_policy": {
+            "defaults": {
               "type": "object"
             }
           }
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "key",
+              "typeURI"
+            ],
+            "properties": {
+              "key": {
+                "type": "string"
+              },
+              "typeURI": {
+                "type": "string",
+                "description": "A DIDComm message type (e.g. https://didcomm.org/issue-credential/2.0/offer-credential) or a local action (https://didcomm.org/workflow/actions/state:set@1)."
+              },
+              "profile_ref": {
+                "type": "string",
+                "pattern": "^(cp|pp)\\.",
+                "description": "cp.<credential profile> or pp.<proof profile>."
+              },
+              "staticInput": {
+                "description": "Input for local actions; for state:set@1, the object merged into context."
+              }
+            }
+          }
+        },
+        "display_hints": {
+          "$ref": "#/$defs/display_hints"
+        },
+        "sensitivity": {
+          "type": "object",
+          "description": "Classification of context fields (didcomm.org definition). Not accepted by @ajna-inc/workflow 0.5.",
+          "properties": {
+            "default": {
+              "$ref": "#/$defs/sensitivity_class"
+            },
+            "fields": {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/$defs/sensitivity_class"
+              }
+            }
+          }
         }
-      },
-      "required": [
-        "template"
+      }
+    },
+    "attribute_spec": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "source",
+            "path"
+          ],
+          "properties": {
+            "source": {
+              "const": "context"
+            },
+            "path": {
+              "type": "string",
+              "description": "Dot path into context."
+            },
+            "required": {
+              "type": "boolean"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "source",
+            "value"
+          ],
+          "properties": {
+            "source": {
+              "const": "static"
+            },
+            "value": {},
+            "required": {
+              "type": "boolean"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "source",
+            "expr"
+          ],
+          "properties": {
+            "source": {
+              "const": "compute"
+            },
+            "expr": {
+              "type": "string",
+              "description": "JMESPath over {context, participants, artifacts, now}."
+            },
+            "required": {
+              "type": "boolean"
+            }
+          }
+        }
       ]
+    },
+    "display_hints": {
+      "type": "object",
+      "description": "Workflow UI 1.0 hints: UI items per state, optionally per UI profile, and the media they use.",
+      "properties": {
+        "ui_version": {
+          "type": "string",
+          "default": "1.0"
+        },
+        "states": {
+          "type": "object",
+          "description": "UI items by state name.",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ui_item"
+            }
+          }
+        },
+        "profiles": {
+          "type": "object",
+          "description": "Per UI profile (sender, receiver) overrides of states; used instead of states when the viewer's profile has an entry for the current state.",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "states": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ui_item"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "assets": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/ui_asset"
+          }
+        },
+        "sensitivity_behavior": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "render": {
+                "enum": [
+                  "masked",
+                  "masked_toggle",
+                  "visible"
+                ]
+              },
+              "mask_format": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "ui_item": {
+      "type": "object",
+      "description": "A Workflow UI 1.0 item. type picks the component; the processor applies the control keys (audience, profile, showWhen, enabledWhen, bind) and {{ JMESPath }} interpolation before it sends items in a status. Items of type button or submit-button with an event make up the action_menu. Renderers ignore types they don't know. Types the Bifold wallet renders: title, text, image, video, button, submit-button, form, text-field, check-box, checkbox, radio, drop-down, dropdown, date, slider, mcq, multiple-choice, rating, information, warning, error, pass, fail, badge, chip, chip-row, pill-row, divider, spacer, row, section, card, tile, carousel, h-scroll, timeline, basic-table, bar-chart, pie-chart, donut-chart, gauge, dial, map, calendar, share-entry.",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "event": {
+          "type": "string",
+          "description": "The transition event an advance sends when the item is activated."
+        },
+        "form-id": {
+          "type": "string",
+          "description": "A form field's key in advance.input."
+        },
+        "audience": {
+          "type": [
+            "string",
+            "array"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "description": "Shown only to a viewer matching one of: a role, participant:<key>, or a UI profile."
+        },
+        "profile": {
+          "type": [
+            "string",
+            "array"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "description": "Shown only for these UI profiles (sender, receiver)."
+        },
+        "showWhen": {
+          "type": "string",
+          "description": "JMESPath over {context, participants, artifacts}; the item is dropped when falsy."
+        },
+        "enabledWhen": {
+          "type": "string",
+          "description": "JMESPath; when falsy the processor sets disabled: true."
+        },
+        "bind": {
+          "type": "string",
+          "description": "JMESPath whose result the processor puts in value."
+        },
+        "value": {},
+        "disabled": {
+          "type": "boolean"
+        },
+        "asset": {
+          "type": "string",
+          "description": "Key into display_hints.assets."
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ui_item"
+          }
+        },
+        "row_template": {
+          "$ref": "#/$defs/ui_item"
+        }
+      }
+    },
+    "ui_asset": {
+      "type": "object",
+      "required": [
+        "mediaType"
+      ],
+      "properties": {
+        "mediaType": {
+          "type": "string"
+        },
+        "uri": {
+          "type": "string"
+        },
+        "attachmentId": {
+          "type": "string"
+        }
+      }
+    },
+    "sensitivity_class": {
+      "type": "object",
+      "properties": {
+        "level": {
+          "enum": [
+            "secret",
+            "pii",
+            "plain"
+          ],
+          "default": "plain"
+        },
+        "storage": {
+          "enum": [
+            "vault",
+            "encrypted",
+            "plain"
+          ],
+          "default": "plain"
+        }
+      }
     }
   }
 }
