@@ -476,6 +476,10 @@
           "type": "string",
           "description": "A form field's key in advance.input."
         },
+        "input_schema": {
+          "type": "object",
+          "description": "On a submit-button: a JSON Schema for the form the renderer shows; the values go in advance.input, shaped by the schema."
+        },
         "audience": {
           "type": [
             "string",

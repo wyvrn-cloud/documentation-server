@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "workflow/1.0/problem-report",
-  "description": "Reports a failure on the thread of the message that caused it. Codes in the definition: template_not_found, template_invalid, instance_not_found, guard_failed, action_failed, discovery_failed, not_authorized, not_found_remote_template, multiplicity_violation, vault_unavailable, vault_ref_invalid, sensitivity_violation. @ajna-inc/workflow also sends invalid_template, invalid_event (including an unknown instance), forbidden (connection mismatch, paused or canceled instance), already_exists (singleton policy), idempotency_conflict, state_conflict, action_error, missing_attributes and temporary_unavailable. (didcomm.org workflow/1.0)",
+  "description": "Reports a failure on the thread of the message that caused it. Codes in the definition: template_not_found, template_invalid, instance_not_found, guard_failed, action_failed, discovery_failed, not_authorized, not_found_remote_template, multiplicity_violation, vault_unavailable, vault_ref_invalid, sensitivity_violation. @ajna-inc/workflow also sends invalid_template, invalid_event (including an unknown instance), forbidden (connection mismatch, paused or canceled instance), already_exists (singleton policy), idempotency_conflict, state_conflict, action_error and temporary_unavailable. (didcomm.org workflow/1.0)",
   "type": "object",
   "required": [
     "id",
